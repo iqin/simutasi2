@@ -31,3 +31,8 @@ composer.lock
 *.log
 *.tmp
 *.cache
+
+
+# File backup
+*.zip
+backup-online-*.zip
