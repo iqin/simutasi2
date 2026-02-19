@@ -1,0 +1,540 @@
+/* ======== NAVBAR ======== */
+.navbar {
+    background: #0626b3;
+    padding: 12px 0; /* Lebih ramping */
+}
+
+.navbar-brand img {
+    max-height: 40px; /* Sesuaikan tinggi logo */
+}
+
+.navbar-nav .nav-link {
+    color: white !important;
+    font-weight: 500;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffc107 !important;
+}
+/* ======== STYLE KHUSUS TOMBOL LOGIN ======== */
+.navbar-nav .nav-item:last-child .nav-link {
+    color: #ffc107 !important; /* Warna teks kuning */
+    font-weight: bold;
+}
+
+.navbar-nav .nav-item:last-child .nav-link:hover {
+    color: white !important; /* Warna teks putih saat hover */
+}
+
+
+
+/* ======== HERO SECTION ======== */
+.hero-section {
+    padding: 100px 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #0073f2, #001fb5);
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-section h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.hero-section .btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* Jarak antar tombol */
+    flex-wrap: wrap; /* Mencegah tombol turun ke bawah */
+}
+
+/* ======== TOMBOL HERO SECTION ======== */
+.hero-section .btn-main {
+    background-color: #ffc107; /* Warna kuning */
+    color: black;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Hover tombol utama */
+.hero-section .btn-main:hover {
+    background-color: #ff9800;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Tombol Masuk di Navbar */
+.navbar .btn-main {
+    background-color: #ffc107;
+    color: black !important;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    padding: 2px 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover efek pada tombol Masuk di navbar */
+.navbar .btn-main:hover {
+    background-color: #ff9800;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* ======== FEATURE SECTION ======== */
+.features {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+/* Style untuk setiap box fitur */
+.feature-box {
+    padding: 10px 0; /* Mengurangi padding untuk lebih proporsional */
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+}
+
+/* Hover Efek */
+.feature-box:hover {
+    transform: translateY(-5px);
+}
+
+/* Ikon Fitur */
+.feature-box i {
+    font-size: 2.5rem;
+    color: #007bff;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* Ikon berubah warna saat hover */
+.feature-box:hover i {
+    color: #ff9800;
+    transform: rotate(10deg) scale(1.1);
+}
+
+/* Judul */
+.feature-box h4 {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Paragraf */
+.feature-box p {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+
+/* ======== FAQ SECTION ======== */
+.faq {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 60px 20px;
+}
+
+.accordion-button {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ======== FOOTER ======== */
+.footer {
+    background: #0626b3;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.footer p {
+    margin-bottom: 10px;
+}
+
+/* Icon dalam footer tetap sebaris */
+.footer-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.footer-icons a {
+    font-size: 20px;
+    color: #ffc107;
+    transition: transform 0.3s ease-in-out;
+}
+
+.footer-icons a:hover {
+    transform: scale(1.2);
+    color: #ff9800;
+}
+
+/* ======== HALAMAN LOGIN (TETAP TIDAK TERPENGARUH) ======== */
+.login-body {
+    background: linear-gradient(135deg, #0073f2, #001fb5);
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 10px 0;
+    min-height: 100vh;
+}
+
+.login-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+    max-width: 420px;
+}
+
+.login-card:hover {
+    transform: scale(1.02);
+}
+/* ====== Penyesuaian Ukuran Login Title ====== */
+.login-title {
+    font-size: 1.05rem; /* Ukuran lebih kecil tetapi masih proporsional */
+    font-weight: bold; /* Menjaga ketebalan font */
+    color: #333; /* Warna teks lebih kontras */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Memberikan jarak antara ikon dan teks */
+}
+
+
+/* ======== TOMBOL LOGIN (TIDAK TERPENGARUH) ======== */
+.btn-login {
+    background: #ffc107;
+    color: black;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 10px;
+    text-transform: uppercase;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-login:hover {
+    background: #ff9800;
+    color: white;
+}
+
+.position-relative input {
+    padding-right: 40px; /* Berikan ruang di sebelah kanan untuk ikon */
+}
+
+/* Posisi ikon toggle password */
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 1rem;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover effect untuk ikon */
+.toggle-password:hover {
+    color: #333;
+}
+
+/* ======== ALERT ERROR ======== */
+.alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Agar ikon close ke kanan */
+    padding: 10px 14px; /* Sesuaikan padding agar lebih seimbang */
+    font-size: 0.95rem;
+    border-radius: 6px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Tambahkan bayangan */
+    max-width: 90%; /* Agar tidak terlalu lebar */
+    margin: 0 auto 10px; /* Tengah dan beri jarak bawah */
+}
+
+/* Ikon peringatan di sisi kiri alert */
+.alert i {
+    margin-right: 10px; /* Jarak ikon peringatan dengan teks */
+    font-size: 1.1rem;
+}
+
+/* ======== TOMBOL CLOSE (X) ======== */
+.alert .btn-close {
+    font-size: 0.8rem; /* Ukuran lebih kecil agar proporsional */
+    padding: 6px; /* Supaya lebih rapi */
+    line-height: 1; /* Jaga keseimbangan */
+    opacity: 0.8; /* Sedikit transparan */
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    top: -2px; /* Menyesuaikan posisi */
+}
+
+.alert .btn-close:hover {
+    opacity: 1; /* Jelas saat hover */
+    transform: scale(1.1); /* Sedikit membesar */
+}
+
+/* Warna spesifik untuk error */
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+    text-align: left;
+}
+
+
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+    .hero-section .btn-main,
+    .hero-section .btn-secondary {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+    }
+
+    .faq {
+        padding: 40px 15px;
+    }
+
+    .accordion-button {
+        font-size: 1rem;
+        padding: 12px;
+    }
+
+    .footer {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section .btn-container {
+        flex-wrap: nowrap; /* Paksa tombol tetap satu baris */
+    }
+    .g-recaptcha {
+        transform: scale(0.75);
+        height: auto;
+    }
+}
+/* Pastikan style link di halaman login tetap sesuai */
+.login-body .info-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.login-body .info-link {
+    color: #007bff !important;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.login-body .info-link i {
+    font-size: 1rem;
+    color: #007bff;
+}
+
+.login-body .info-link:hover {
+    text-decoration: underline;
+    color: #0056b3 !important;
+}
+
+/* ======== PENYESUAIAN LOGO DI FORM LACAK MUTASI ======== */
+.track-logo, .login-logo {
+    max-width: 80%; /* Membatasi ukuran maksimum */
+    height: auto; /* Menjaga aspek rasio */
+    margin: 0 auto 10px auto; /* Memastikan logo tetap di tengah */
+    display: block;
+}
+
+/* ======== PENYESUAIAN CONTAINER RECAPTCHA ======== */
+.recaptcha-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* ======== PASTIKAN RECAPTCHA TIDAK TERPOTONG ======== */
+.g-recaptcha {
+    transform: scale(0.90); /* Skala awal untuk menyesuaikan */
+    transform-origin: center;
+    max-width: 100%;
+    display: inline-block;
+    height: auto; /* Pastikan tinggi tetap */
+}
+
+/* ======== 1. PENGATURAN BODY UNTUK LACAK MUTASI ======== */
+.track-body {
+    background: linear-gradient(135deg, #3f51b5, #1a237e);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* ======== 2. PENGATURAN KOTAK CARD UNTUK PENCARIAN ======== */
+.track-card {
+    max-width: 420px;
+    width: 90%;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.track-card:hover {
+    transform: scale(1.02);
+}
+
+/* ======== LOGO & INSTANSI ======== */
+.track-logo {
+    width: 220px !important; /* Sesuaikan ukuran */
+    height: auto !important;
+    margin-bottom: 5px !important;
+}
+
+.instansi-text {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #0040cd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.instansi-subtext {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* ======== JUDUL LACAK MUTASI ======== */
+.track-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #0040cd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.track-title i {
+    margin-right: 8px;
+}
+
+/* ======== FORM INPUT ======== */
+.track-form .form-control-user {
+    font-size: 0.95rem;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+/* ======== TOMBOL CARI ======== */
+.btn-search {
+    width: 100%;
+    padding: 12px;
+    background: #ffc107;
+    color: black;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    text-transform: uppercase;
+}
+
+.btn-search:hover {
+    background: #ff9800;
+    color: white;
+    transform: scale(1.03);
+}
+
+/* ======== LINK KEMBALI KE BERANDA ======== */
+.info-link {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #007bff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.3s ease-in-out;
+}
+
+.info-link:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+    .track-card {
+        width: 90%;
+        max-width: 380px;
+        padding: 20px;
+    }
+
+    .track-title {
+        font-size: 1.3rem;
+    }
+
+    .track-form .form-control-user {
+        font-size: 0.9rem;
+        padding: 9px;
+    }
+
+    .btn-search {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    .g-recaptcha {
+        transform: scale(0.80);
+        height: auto;
+    }
+        .track-logo, .login-logo {
+        max-width: 70%; /* Lebih kecil di layar mobile */
+    }
+}

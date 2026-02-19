@@ -1,0 +1,33 @@
+# CodeIgniter 4 specific
+.env
+.env.example
+/writable/*
+!writable/.htaccess
+/public/uploads/*
+!public/uploads/.htaccess
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Composer
+/vendor/
+composer.lock
+
+# Local configuration
+/app/Config/Database.php
+/app/Config/App.php
+/app/Config/Mimes.php
+
+# Logs
+/writable/logs/*
+/writable/cache/*
+/writable/session/*
+/writable/debugbar/*
+
+# Temporary files
+*.log
+*.tmp
+*.cache

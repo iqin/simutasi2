@@ -1,0 +1,1109 @@
+/* ======== 1. PENGATURAN DASAR ======== */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+#sidebar {
+    min-height: 100vh;
+    flex-shrink: 0;
+}
+
+#content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+#content {
+    flex-grow: 1;
+}
+
+.sticky-footer {
+    width: 100%;
+    background-color: #f8f9fc;
+    padding: 10px 0;
+    text-align: center;
+    position: relative;
+}
+
+.mt-auto {
+    margin-top: auto;
+}
+
+
+body {
+    font-size: 1rem;
+    line-height: 1.2;
+    font-family: 'Arial', sans-serif;
+    width: 100%;
+}
+
+/* 🔹 Fullscreen Overlay (Untuk Loading Dashboard) */
+#loadingOverlay {
+    position: fixed; /* Menutupi seluruh layar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7); /* Transparan agar terlihat smooth */
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Pastikan berada di atas semua elemen */
+}
+
+/* 🔹 Overlay Loading Hanya untuk Tabel */
+.table-loading-overlay {
+    position: absolute; /* Pastikan overlay tetap dalam container */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Pastikan overlay hanya di atas tabel */
+    display: none; /* Default tidak ditampilkan */
+}
+
+/* 🔹 Pastikan Container Tabel Memiliki Position Relative */
+.table-responsive {
+    position: relative; /* Ini penting agar overlay tetap dalam tabel */
+}
+
+/* 🔹 Spinner dengan 3 Lingkaran */
+.loader {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* 🔵 Lingkaran 1 - Biru Muda */
+.loader::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: #a6c8ff; /* Soft Blue */
+    animation: spin 1.2s linear infinite;
+}
+
+/* 🔵 Lingkaran 2 - Biru Pastel */
+.loader::after {
+    content: "";
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: #d6e4ff; /* Lighter Blue */
+    animation: spin 1.5s linear infinite reverse;
+}
+
+/* 🔵 Lingkaran 3 - Biru Abu */
+.loader span {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: #8ca8d6; /* Muted Blue */
+    animation: spin 1.8s linear infinite;
+}
+
+/* 🔹 Efek Animasi Putaran */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.jenis-usulan-col {
+    white-space: normal;
+    word-break: break-word;
+    min-width: 100px;
+    max-width: 150px;
+}
+
+/* Tombol dan Select */
+.btn-sm-custom {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.form-group label {
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.form-control {
+    font-size: 0.875rem;
+    height: 30px;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+select.form-control {
+    cursor: pointer;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1040;
+}
+
+/* ======== 2. LAYOUT RESPONSIVE ======== */
+/*
+.container {
+    max-width: 100%;
+    padding: 0 15px;
+}
+.upload-form-container {
+    background-color: #f8f9fc;
+    border: 2px solid #007bff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+.upload-table th {
+    background-color: #f6c23e !important;
+    color: black !important;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.upload-table td {
+    padding: 8px;
+    vertical-align: middle;
+}
+.upload-table input[type='text'],
+.upload-table input[type='date'],
+.upload-table select,
+.upload-table input[type='file'] {
+    width: 100%;
+    padding: 6px;
+    font-size: 0.85rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.upload-table .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.upload-table .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+*/
+.upload-form-container {
+    background-color: #f8f9fc;
+    border: 2px solid #007bff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
+    display: none; /* Default form tersembunyi */
+}
+
+/* Efek animasi saat form muncul */
+.animate-fade {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Header Form Upload */
+.upload-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.upload-title i {
+    margin-right: 8px;
+}
+
+/* Tampilan elemen input dalam card */
+.upload-form-container label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.upload-form-container input[type='text'],
+.upload-form-container input[type='date'],
+.upload-form-container select,
+.upload-form-container input[type='file'] {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.85rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* Tombol Simpan & Batal */
+.upload-form-container .btn-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.upload-form-container .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 6px 12px;
+}
+
+.upload-form-container .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    padding: 6px 12px;
+}
+
+/* Efek hover untuk tabel utama */
+.table-active {
+    background-color: #e3f2fd !important;
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Atur header agar tetap terlihat */
+.upload-header {
+    background-color: #f6c23e !important;
+    color: black !important;
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+    /* Custom checkbox styling */
+    .custom-checkbox {
+        position: relative;
+        cursor: pointer;
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+    }
+
+    .custom-checkbox input {
+        opacity: 0;
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+
+    .custom-checkbox .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 20px;
+        height: 20px;
+        background-color: #fff;
+        border: 2px solid #6c757d;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+
+    .custom-checkbox input:checked + .checkmark {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .custom-checkbox .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .custom-checkbox input:checked + .checkmark:after {
+        display: block;
+    }
+
+    .custom-checkbox .checkmark:after {
+        left: 7px;
+        top: 3px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+/* Tombol Aksi */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    padding: 6px;
+    background: #f8f9fc;
+    /*border-radius: 8px; /* Border-radius lebih kecil agar lebih elegan */
+}
+
+.page-item .page-link {
+    color: #4e73df;
+    background-color: #fff;
+    border: 1px solid #ddd; /* Menambah border agar lebih jelas */
+    padding: 6px 10px; /* Menyesuaikan padding agar proporsional */
+    font-size: 0.85rem; /* Mengecilkan font agar tidak terlalu besar */
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.page-item .page-link:hover {
+    background-color: #e2e6ea; /* Warna hover lebih soft */
+    border-color: #c2c7d0;
+}
+
+.page-item.active .page-link {
+    color: #fff;
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.page-item.disabled .page-link {
+    color: #b0b3c2;
+    pointer-events: none;
+    background-color: #f8f9fc;
+    border-color: #ddd;
+}
+
+.d-flex.justify-content-between {
+    flex-wrap: wrap;
+    align-items: center;
+}
+.pagination-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 400;
+    margin-bottom: 0;
+    display: inline-block;
+}
+
+
+/* ======== FORM FILTER & PAGINATION ======== */
+.filter-section {
+    display: flex;
+    justify-content: space-between; /* Memastikan label di kiri, filter di tengah, dan select di kanan */
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 8px; /* Jarak antar elemen */
+    /*flex-wrap: nowrap; /* Mencegah elemen pindah ke baris berikutnya */
+}
+
+.filter-section label {
+    margin: 0;
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 500;
+    white-space: nowrap; /* Mencegah teks pindah ke bawah */
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Jarak antara ikon dan teks */
+}
+
+.filter-section .d-flex > * {
+    margin-left: 8px; /* Tambahkan jarak antar input filter dan select */
+}
+
+
+
+
+.filter-section .filter-input {
+    flex-grow: 1; /* Agar input filter bisa fleksibel mengisi ruang */
+    min-width: 180px; /* Batas minimal lebar input */
+    max-width: 250px; /* Batas maksimal lebar input */
+    height: 30px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.filter-section select {
+    min-width: 60px; /* Agar ukuran dropdown tidak terlalu besar */
+    max-width: 80px;
+    height: 30px;
+    font-size: 0.85rem;
+    padding: 4px 6px;
+}
+
+
+
+/* ======== 3. PENGATURAN TABEL ======== */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Ukuran Font & Padding Tabel */
+.table {
+    font-size: 0.85rem; /* Ukuran font sedikit lebih kecil */
+    border-collapse: collapse; /* Mengurangi jarak antar sel */
+    border: 1px solid #dee2e6;
+}
+
+/* Header Tabel */
+.table th {
+    background-color: #4e73df;
+    color: white;
+    font-weight: bold;
+    text-align: left;
+    padding: 10px; /* Mengurangi padding untuk baris lebih rapat */
+}
+
+/* Baris Data */
+.table td {
+    padding: 8px 10px; /* Mengurangi padding dalam sel */
+    vertical-align: middle; /* Menyesuaikan posisi teks */
+    border: 1px solid #dee2e6;
+
+}
+
+/* Hover Efek */
+.table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* ======== TABEL UNTUK HALAMAN DENGAN DUA BAGIAN ======== */
+.table-sm {
+    font-size: 0.75rem; /* Ukuran font lebih kecil agar proporsional */
+    border-collapse: collapse; /* Hilangkan jarak antar border */
+}
+
+/* Header Tabel */
+.table-sm th {
+    background-color: #4e73df;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 8px 10px; /* Padding lebih kecil */
+    font-size: 0.75rem; /* Header juga disesuaikan */
+     white-space: nowrap;
+}
+
+/* Isi Data */
+.table-sm td {
+    padding: 8px 10px; /* Padding yang lebih kecil agar lebih padat */
+    border: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+/* Hover Efek */
+.table-sm tbody tr:hover {
+    background-color: #f8f9fc;
+}
+
+/* Penyesuaian untuk kolom aksi agar tombol tidak terlalu besar */
+.table-sm td .btn-sm {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+}
+
+/* Warna background baris tabel agar sama seperti di halaman Telaah Dokumen */
+.table-sm tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fc !important; /* Abu-abu terang */
+}
+
+.table-sm tbody tr:nth-of-type(even) {
+    background-color: #ffffff !important; /* Putih */
+}
+
+/* Hover efek tetap sama */
+.table-sm tbody tr:hover {
+    background-color: #eaf1fd !important; /* Biru lembut */
+}
+
+
+
+/* ======== STATUS BADGES ======== */
+.badge {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-pending {
+    background-color: #007bff;
+    color: white;
+}
+
+
+/* Kolom Aksi */
+.action-column {
+    white-space: nowrap;
+}
+
+/* Tombol dalam Aksi */
+.action-column a,
+.action-column button {
+    margin-right: 3px;
+    padding: 3px 5px; /* Membuat tombol lebih kecil agar tidak terlalu besar */
+    font-size: 0.75rem;
+}
+
+
+/* ======== DETAIL USULAN ======== */
+.detail-container {
+    background-color: #f8f9fc;
+    border: 1px solid #dee2e6;
+    padding: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 5px; /* Mengurangi jarak dari pagination */
+    display: none;
+}
+
+.detail-table {
+    width: 100%;
+    font-size: 0.75rem; /* Mengecilkan ukuran font agar lebih padat */
+    border-collapse: collapse; /* Menghindari jarak antar sel */
+}
+
+/* Header Tabel */
+.detail-table th {
+    background-color: #4e73df;
+    color: white;
+    padding: 8px 10px; /* Mengurangi padding agar lebih rapat */
+    text-align: right;
+    max-width: 180px;
+    white-space: nowrap;
+    font-size: 0.75rem; /* Mengecilkan font agar lebih kompak */
+    vertical-align: middle;
+}
+
+/* Isi Data */
+.detail-table td {
+    padding: 8px 10px; /* Padding lebih kecil agar lebih rapat */
+    background-color: #f8f9fc;
+    line-height: 1.5; /* Jarak antar teks lebih rapat */
+    width: 100%;
+    vertical-align: middle;
+}
+
+.custom-bg {
+    background-color: #f8f9fc !important; /* Warna khusus hanya untuk TH ini */
+    color: #000; /* Warna teks agar lebih kontras */
+    font-weight: bold; /* (Opsional) Tambahkan ketebalan font */
+    text-align: center;
+}
+
+.bg-warning-custom {
+    background-color: #ffc107 !important; /* Warna kuning lebih cerah */
+    color: #212529 !important; /* Warna teks lebih gelap untuk kontras */
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block;
+    width: 100%;
+}
+
+
+
+/* ======== STATUS CONTAINER ======== */
+.status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-left: 5px solid !important; /* Border kiri tetap tegas */
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-top: 10px; /* Jarak dari elemen sebelumnya */
+    font-size: 0.9rem; /* Ukuran teks lebih proporsional */
+}
+/* Judul Status */
+.status-title {
+    font-size: 0.9rem; /* Mengecilkan ukuran font */
+    font-weight: 600;
+    margin-bottom: 2px; /* Mengurangi jarak bawah */
+}
+
+/* Teks utama (baris pertama) */
+.status-note {
+    font-weight: 600; /* Tidak terlalu tebal */
+    font-size: 1rem; /* Ukuran lebih kecil dari sebelumnya */
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Jarak antara ikon dan teks */
+}
+
+/* Teks subnote (baris kedua) */
+.status-subnote {
+    font-size: 0.85rem; /* Ukuran lebih kecil agar proporsional */
+    font-weight: 500; /* Lebih ringan dari teks utama */
+    text-align: center;
+    margin-top: 2px; /* Jarak sedikit dari teks utama */
+}
+
+/* Warna untuk masing-masing status */
+.status-container.success {
+    background-color: #e9f8eb;
+    border-left-color: #28a745;
+    color: #155724;
+}
+
+.status-container.danger {
+    background-color: #fdecea;
+    border-left-color: #dc3545;
+    color: #721c24;
+}
+
+.status-container.pending {
+    background-color: #e8f1fc;
+    border-left-color: #007bff;
+    color: #004085;
+}
+
+/* Ukuran ikon agar tetap proporsional */
+.status-note i {
+    font-size: 1rem; /* Ikon lebih kecil agar tidak mendominasi */
+}
+
+
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+
+/* Penyesuaian SweetAlert */
+.swal2-popup {
+    width: 400px !important; /* Sedikit lebih lebar */
+    max-width: 95%; /* Fleksibel untuk layar kecil */
+    font-size: 14px !important;
+    padding: 20px !important;
+}
+
+.swal2-title {
+    font-size: 24px !important;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px !important;
+}
+
+.swal2-html-container {
+    font-size: 16px !important;
+    color: #444 !important;
+    text-align: center;
+    margin-bottom: 15px !important;
+}
+
+
+
+
+/* Tombol Konfirmasi */
+.swal-button-confirm {
+    background-color: #6C5CE7 !important; /* Warna ungu */
+    color: #fff !important;
+    font-size: 14px !important;
+    padding: 8px 15px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
+
+/* Tombol Batal */
+.swal-button-cancel {
+    background-color: #636e72 !important; /* Warna abu-abu */
+    color: #fff !important;
+    font-size: 14px !important;
+    padding: 8px 15px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
+
+/* ========== STYLING KHUSUS HALAMAN LOGIN ========== */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Agar card tetap berada di tengah layar */
+    background: linear-gradient(135deg, #3f51b5, #1a237e);
+    overflow: hidden;
+}
+
+/* ========== CARD LOGIN ========== */
+.login-card {
+    max-width: 480px; /* Perlebar tampilan */
+    width: 90%;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Pastikan reCAPTCHA tetap proporsional */
+.login-card .g-recaptcha {
+    transform: scale(0.9);
+    transform-origin: center;
+}
+
+/* Mengatur margin elemen dalam card agar lebih proporsional */
+.login-card img {
+    max-width: 70px;
+    margin-bottom: 10px;
+}
+
+.instansi-text {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.instansi-subtext {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+
+/* ======== DASHBOARD STYLING ======== */
+.dashboard-container {
+    padding: 20px;
+}
+
+/* Kotak Statistik */
+.dashboard-card {
+    border-radius: 8px;
+    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    min-height: 180px; /* Menyamakan tinggi card */
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Ukuran Font */
+.dashboard-text-md {
+    font-size: 1rem; /* Font sedikit diperbesar */
+    font-weight: bold;
+}
+
+.text-xs {
+    font-size: 0.85rem; /* Ukuran teks kecil diperjelas */
+}
+
+.dashboard-card:hover {
+    transform: scale(1.02); /* Efek sedikit membesar saat hover */
+}
+
+/* Nomor di Pojok Kiri Bawah */
+.dashboard-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #555;
+    padding-left: 5px;
+}
+
+/* Ikon di Pojok Kanan Bawah */
+.dashboard-icon {
+    opacity: 0.7;
+    font-size: 2rem;
+    padding-right: 5px;
+}
+
+/* Warna Card */
+.dashboard-card-yellow {
+    border-left: 8px solid #FFC107;
+}
+
+.dashboard-card-blue {
+    border-left: 8px solid #007BFF;
+}
+
+.dashboard-card-green {
+    border-left: 8px solid #28A745;
+}
+
+.dashboard-card-red {
+    border-left: 8px solid #DC3545;
+}
+
+.dashboard-card-purple {
+    border-left: 8px solid #6F42C1;
+}
+
+/* Ukuran teks lebih besar */
+.dashboard-text-md {
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+
+.dashboard-text-right {
+    text-align: right;
+}
+/*
+.badge {
+    font-size: 0.75rem;
+    padding: 5px 8px;
+    margin-right: 5px;
+    border-radius: 6px;
+}
+*/
+/* 🔹 Dashboard Card Styling */
+.dashboard-card-custom {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;   /* ✅ border menyeluruh */
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease-in-out;
+    min-height: 150px;
+    position: relative;
+}
+.dashboard-card-custom:hover {
+    transform: translateY(-4px);
+    box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.1);
+    border-color: #d0d0d0; /* ✅ border lebih gelap saat hover */
+}
+
+/* 🔹 Header (Judul dan Tahun) */
+.dashboard-card-header {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    font-weight: 600;
+    color: #858796;  /* ✅ lebih gelap */
+    text-transform: uppercase;
+    border-bottom: 1px solid #eee;   /* ✅ garis bawah */
+    padding-bottom: 5px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.02), rgba(0,0,0,0)); /* ✅ gradient tipis */
+}
+
+.dashboard-subtitle {
+    font-size: 11px;
+    color: #858796;
+}
+
+/* 🔹 Konsistensi Ukuran & Warna Badge */
+.dashboard-card-content {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+}
+
+.dashboard-card-content .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 9px;
+    font-weight: 500;
+    border-radius: 6px;
+    width: fit-content;
+    min-width: 75px;
+    text-align: left;
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #858796;
+}
+
+/* 🔹 Footer (Jumlah dan Ikon) */
+.dashboard-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: auto;
+}
+
+/* 🔹 Ukuran Angka (Jumlah) */
+.dashboard-count {
+    font-size: 18px;
+    font-weight: bold;
+    color: #858796;
+    margin-right: 8px;
+}
+
+/* 🔹 Ukuran & Warna Ikon */
+.dashboard-icon {
+    font-size: 22px;
+    color: #858796;
+}
+
+/* Warna Border Setiap Card */
+.dashboard-card-blue { border-left: 5px solid #4e73df; }
+.dashboard-card-yellow { border-left: 5px solid #f6c23e; }
+.dashboard-card-red { border-left: 5px solid #e74a3b; }
+.dashboard-card-green { border-left: 5px solid #1cc88a; }
+.dashboard-card-purple { border-left: 5px solid #6f42c1; }
+
+/* ======== 5. RESPONSIVE SCALING UNTUK LAYAR KECIL ======== */
+@media screen and (max-width: 1280px) {
+    body {
+        zoom: 0.95;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    body {
+        zoom: 0.85;
+    }
+    .table {
+        font-size: 0.85rem;
+    }
+    .btn-sm-custom {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+    .form-control {
+        font-size: 0.85rem;
+        height: 28px;
+    }
+
+    .dashboard-card {
+        padding: 12px;
+        border-left-width: 8px;
+    }
+    
+    .dashboard-text-md {
+        font-size: 0.95rem;
+    }
+    
+    .dashboard-icon {
+        font-size: 1.5rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        zoom: 0.8;
+    }
+    .table {
+        font-size: 0.8rem;
+    }
+    .btn-sm-custom {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+    .form-control {
+        font-size: 0.8rem;
+        height: 28px;
+    }
+    .login-card {
+        width: 95%;
+        padding: 20px;
+    }
+    .g-recaptcha {
+        transform: scale(0.85);
+    }
+    .jenis-usulan-col {
+        min-width: 160px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    body {
+        zoom: 0.75;
+    }
+    .table {
+        font-size: 0.75rem;
+    }
+    .btn-sm-custom {
+        font-size: 0.65rem;
+        padding: 3px 5px;
+    }
+    .form-control {
+        font-size: 0.75rem;
+        height: 26px;
+    }
+        .login-card {
+        width: 100%;
+        max-width: 380px;
+        padding: 15px;
+    }
+
+    .login-logo {
+        width: 55px;
+    }
+
+    .login-title {
+        font-size: 1rem;
+    }
+
+    .form-control {
+        font-size: 0.9rem;
+        height: 36px;
+    }
+    
+}
