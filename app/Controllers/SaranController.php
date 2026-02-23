@@ -64,22 +64,50 @@ class SaranController extends Controller
         if (!in_array(session()->get('role'), ['admin', 'kabid'])) {
             return redirect()->to('/kotak-saran')->with('error', 'Anda tidak memiliki izin untuk membalas!');
         }
-    
+
         $saranModel = new SaranMutasiModel();
         $balasan = esc($this->request->getPost('balasan')); // Mencegah XSS
-    
-        $saran = $saranModel->where('id', $id)->first();
-    
+
+        // Ambil data saran beserta nama guru dari tabel usulan
+        $saran = $saranModel->select('saran_mutasi.*, usulan.guru_nama, usulan.nomor_usulan')
+                            ->join('usulan', 'usulan.nomor_usulan = saran_mutasi.nomor_usulan', 'left')
+                            ->where('saran_mutasi.id', $id)
+                            ->first();
+
         if (!$saran) {
             return redirect()->to('/kotak-saran')->with('error', 'Saran tidak ditemukan!');
         }
-    
+
         // Simpan balasan
         $saranModel->update($id, [
             'balasan' => $balasan,
             'status' => 'Sudah Dibalas'
         ]);
-    
+
+        // 🔔 Kirim email notifikasi ke pengirim saran
+        if (!empty($saran['email'])) {
+            helper('phpmailer');
+
+            $nama = $saran['guru_nama'] ?? 'Pengirim';
+            $jenisLabel = 'Saran';
+            $nomor = $saran['nomor_usulan'] ?? '-';
+            $pesanUtama = "Saran Anda:<br><em>" . htmlspecialchars($saran['saran']) . "</em><br><br>Balasan:<br><strong>" . $balasan . "</strong>";
+            $status = "Balasan dari Admin";
+            $link = base_url('kotak-saran'); // Link ke halaman kotak saran
+
+            $subject = 'SIMUTASI - Balasan Kotak Saran';
+            $message = getEmailTemplate(
+                $nama,
+                $jenisLabel,
+                $nomor,
+                $pesanUtama,
+                $status,
+                $link
+            );
+
+            send_email_phpmailer($saran['email'], $subject, $message);
+        }
+
         return redirect()->to('/kotak-saran')->with('success', 'Balasan berhasil dikirim!');
     }
 
