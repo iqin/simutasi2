@@ -64,7 +64,17 @@
     <div class="col-md-6">
         <div class="filter-section">
             <label class="text-primary"><i class="fas fa-info-circle"></i> 01: Belum Dikirim</label>
-            <input type="text" id="filterStatus01" class="form-control filter-input" placeholder="Filter Nama GTK" onkeyup="filterTable('tableStatus01', this.value)">
+            <form method="get" id="formStatus01" class="d-flex">
+                <input type="text" name="search_01" class="form-control filter-input" 
+                    placeholder="Filter Nama GTK" value="<?= esc($search01 ?? '') ?>" autocomplete="off">
+                <select name="perPage" class="form-control" onchange="this.form.submit()">
+                    <option value="10" <?= ($perPage ?? 10) == 10 ? 'selected' : '' ?>>10</option>
+                    <option value="25" <?= ($perPage ?? 10) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPage ?? 10) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPage ?? 10) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
         </div>
         <div class="table-responsive">
             <table id="tableStatus01" class="table table-sm table-striped">
@@ -120,7 +130,7 @@
         </div>
         <?php if (!empty($pager)) : ?>
             <div class="pagination-container">
-                <?= $pager->links('page_status01', 'default_full'); ?>
+                <?= $pager->links('page_status01', 'default_full', ['search_01' => $search01 ?? '', 'perPage' => $perPage ?? 10]) ?>
             </div>
         <?php endif; ?>
 
@@ -160,10 +170,26 @@
     
     <!-- Tabel Kanan -->
     <div class="col-md-6">
-    <div class="filter-section">
-        <label class="text-primary"><i class="fas fa-info-circle"></i> 02: Usulan Terkirim</label>
-        <input type="text" id="filterStatus02" class="form-control filter-input" placeholder="Filter Nama GTK" onkeyup="filterTable('tableStatus02', this.value)">
-    </div>
+        <div class="filter-section">
+            <label class="text-primary"><i class="fas fa-info-circle"></i> 02: Usulan Terkirim</label>
+            <form method="get" id="formStatus02" class="d-flex flex-wrap gap-2">
+                <input type="text" name="search_02" class="form-control filter-input" 
+                    placeholder="Filter Nama GTK" value="<?= esc($search02 ?? '') ?>" autocomplete="off" style="flex:2;">
+                <select name="status_filter" class="form-control" style="flex:1;" onchange="this.form.submit()">
+                    <option value="">Status</option>
+                    <option value="Terkirim" <?= ($statusFilter ?? '') == 'Terkirim' ? 'selected' : '' ?>>Terkirim</option>
+                    <option value="Lengkap" <?= ($statusFilter ?? '') == 'Lengkap' ? 'selected' : '' ?>>Lengkap</option>
+                    <option value="TdkLengkap" <?= ($statusFilter ?? '') == 'TdkLengkap' ? 'selected' : '' ?>>TdkLengkap</option>
+                </select>
+                <select name="perPage" class="form-control w-auto" style="flex:1;" onchange="this.form.submit()">
+                    <option value="10" <?= ($perPage ?? 10) == 10 ? 'selected' : '' ?>>10</option>
+                    <option value="25" <?= ($perPage ?? 10) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPage ?? 10) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPage ?? 10) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
+        </div>
 
         <div class="table-responsive">
             <table id="tableStatus02" class="table table-sm table-striped">
@@ -226,7 +252,7 @@
         </div>
         <?php if (!empty($pager)) : ?>
             <div class="pagination-container">
-                <?= $pager->links('page_status02', 'default_full'); ?>
+                <?= $pager->links('page_status02', 'default_full', ['search_02' => $search02 ?? '', 'perPage' => $perPage ?? 10, 'status_filter' => $statusFilter ?? '']) ?>
             </div>
         <?php endif; ?>
 
@@ -430,6 +456,7 @@ function showBerkasModal(nomorUsulan) {
 
 
 <script>
+    /*
     function filterTable(tableId, searchValue) {
         const table = document.getElementById(tableId);
         const rows = table.getElementsByTagName('tr');
@@ -448,7 +475,7 @@ function showBerkasModal(nomorUsulan) {
 
             rows[i].style.display = match ? '' : 'none';
         }
-    }
+    }*/
 </script>
 
 <script>
@@ -564,6 +591,37 @@ function showBerkasModal(nomorUsulan) {
                 confirmButtonText: 'OK'
             });
         <?php endif; ?>
+    });
+
+    // Debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Debounce untuk input search tabel kiri
+        const inputSearch01 = document.querySelector('input[name="search_01"]');
+        if (inputSearch01) {
+            inputSearch01.addEventListener('keyup', debounce(function() {
+                this.form.submit();
+            }, 500));
+        }
+
+        // Debounce untuk input search tabel kanan
+        const inputSearch02 = document.querySelector('input[name="search_02"]');
+        if (inputSearch02) {
+            inputSearch02.addEventListener('keyup', debounce(function() {
+                this.form.submit();
+            }, 500));
+        }
     });
 </script>
 

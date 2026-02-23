@@ -25,7 +25,12 @@ class PengirimanController extends BaseController
     {
         $role = session()->get('role'); 
         $userId = session()->get('id'); 
-        $perPage = 10;
+        $perPage = $this->request->getVar('perPage') ?: 10;
+
+        // ✅ Ambil parameter pencarian
+        $search01 = $this->request->getGet('search_01');
+        $search02 = $this->request->getGet('search_02');
+        $statusFilter = $this->request->getGet('status_filter');
 
         $status01Usulan = [];
         $status02Usulan = [];
@@ -37,37 +42,40 @@ class PengirimanController extends BaseController
         }
 
         if ($role === 'admin') {
-            $status01Usulan = $this->filterCabdinModel->getUsulanByStatus('01', null, $perPage);
-            $status02Usulan = $this->filterCabdinModel->getUsulanWithDokumenPaginated('02', null, $perPage);
-            $totalStatus01 = $this->filterCabdinModel->countUsulanByStatus('01');
-            $totalStatus02 = $this->filterCabdinModel->countUsulanWithDokumen('02');
+            $status01Usulan = $this->filterCabdinModel->getUsulanByStatus('01', null, $perPage, $search01);
+            $status02Usulan = $this->filterCabdinModel->getUsulanWithDokumenPaginated('02', null, $perPage, $search02, $statusFilter);
+            $totalStatus01 = $this->filterCabdinModel->countUsulanByStatus('01', null, $search01);
+            $totalStatus02 = $this->filterCabdinModel->countUsulanWithDokumen('02', null, $search02, $statusFilter);
             $readonly = false;
         } elseif ($role === 'operator') {
             $operatorModel = new OperatorCabangDinasModel();
             $operator = $operatorModel->where('user_id', $userId)->first();
             if ($operator && isset($operator['cabang_dinas_id'])) {
                 $cabangDinasId = $operator['cabang_dinas_id'];
-                $status01Usulan = $this->filterCabdinModel->getUsulanByStatus('01', $cabangDinasId, $perPage);
-                $status02Usulan = $this->filterCabdinModel->getUsulanWithDokumenPaginated('02', $cabangDinasId, $perPage);
-                $totalStatus01 = $this->filterCabdinModel->countUsulanByStatus('01', $cabangDinasId);
-                $totalStatus02 = $this->filterCabdinModel->countUsulanWithDokumen('02', $cabangDinasId);
+                $status01Usulan = $this->filterCabdinModel->getUsulanByStatus('01', $cabangDinasId, $perPage, $search01);
+                $status02Usulan = $this->filterCabdinModel->getUsulanWithDokumenPaginated('02', $cabangDinasId, $perPage, $search02, $statusFilter);
+                $totalStatus01 = $this->filterCabdinModel->countUsulanByStatus('01', $cabangDinasId, $search01);
+                $totalStatus02 = $this->filterCabdinModel->countUsulanWithDokumen('02', $cabangDinasId, $search02, $statusFilter);
                 $readonly = false;
             } else {
                 return redirect()->to('/dashboard')->with('error', 'Cabang dinas tidak ditemukan.');
             }
         } elseif ($role === 'kabid') {
-            $status01Usulan = $this->filterCabdinModel->getUsulanByStatus('01', null, $perPage);
-            $status02Usulan = $this->filterCabdinModel->getUsulanWithDokumenPaginated('02', null, $perPage);
-            $totalStatus01 = $this->filterCabdinModel->countUsulanByStatus('01');
-            $totalStatus02 = $this->filterCabdinModel->countUsulanWithDokumen('02');
+            $status01Usulan = $this->filterCabdinModel->getUsulanByStatus('01', null, $perPage, $search01);
+            $status02Usulan = $this->filterCabdinModel->getUsulanWithDokumenPaginated('02', null, $perPage, $search02, $statusFilter);
+            $totalStatus01 = $this->filterCabdinModel->countUsulanByStatus('01', null, $search01);
+            $totalStatus02 = $this->filterCabdinModel->countUsulanWithDokumen('02', null, $search02, $statusFilter);
             $readonly = true;
         }
 
         $data = [
             'status01Usulan' => $status01Usulan,
             'status02Usulan' => $status02Usulan,
-            'pager' => $this->filterCabdinModel->pager, // Pastikan `pager` dikirim ke view
+            'pager' => $this->filterCabdinModel->pager,
             'perPage' => $perPage,
+            'search01' => $search01,
+            'search02' => $search02,
+            'statusFilter' => $statusFilter,
             'readonly' => $readonly,
         ];
 
@@ -150,6 +158,37 @@ public function updateStatus()
             ->where('nomor_usulan', $nomorUsulan)
             ->set(['status' => '02', 'updated_at' => date('Y-m-d H:i:s')])
             ->update();
+
+        // 🔔 KIRIM EMAIL NOTIFIKASI KE GURU
+        helper('phpmailer');
+        $usulanModel = new \App\Models\UsulanModel();
+        $usulan = $usulanModel->where('nomor_usulan', $nomorUsulan)->first();
+
+        if ($usulan && !empty($usulan['email'])) {
+            $jenisLabel = match ($usulan['jenis_usulan']) {
+                'mutasi_tetap' => 'Mutasi',
+                'nota_dinas'   => 'Nota Dinas',
+                'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                default => $usulan['jenis_usulan']
+            };
+
+            $pesanUtama = "Berkas usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah dikirim ke Dinas Provinsi.";
+            $status = "02 - Berkas usulan {$jenisLabel} telah dikirim ke Dinas Provinsi";
+            $link = base_url('lacak-mutasi');
+
+            $message = getEmailTemplate(
+                $usulan['guru_nama'],
+                $jenisLabel,
+                $nomorUsulan,
+                $pesanUtama,
+                $status,
+                $link
+            );
+
+            $subject = "SIMUTASI 02 - Berkas usulan {$jenisLabel} telah dikirim ke Dinas Provinsi";
+
+            send_email_phpmailer($usulan['email'], $subject, $message);
+        }
 
         session()->setFlashdata('success', 'Usulan berhasil dikirim.');
         return redirect()->to('/pengiriman');
