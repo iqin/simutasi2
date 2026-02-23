@@ -24,17 +24,17 @@
     <!-- Tabel Menunggu Telaah -->
     <div class="col-md-6">
         <div class="filter-section">
-            <label class="text-primary"><i class="fas fa-info-circle"></i> 04.1. Menunggu Telaah</label>            
-            <div class="d-flex">
-                <input type="text" id="filterMenunggu" class="form-control filter-input" placeholder="Filter Nama Guru" onkeyup="filterTable('tableMenunggu', this.value)">
-                <form method="get" id="perPageFormMenunggu">
-                    <select name="perPage" class="form-control" onchange="document.getElementById('perPageFormMenunggu').submit();">
-                        <option value="25" <?= $perPage == 25 ? 'selected' : '' ?>>25</option>
-                        <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
-                        <option value="100" <?= $perPage == 100 ? 'selected' : '' ?>>100</option>
-                    </select>
-                </form>
-            </div>
+            <label class="text-primary"><i class="fas fa-info-circle"></i> 04.1. Menunggu Telaah</label>
+            <form method="get" id="formMenunggu" class="d-flex">
+                <input type="text" name="search_menunggu" class="form-control filter-input" 
+                    placeholder="Filter Nama Guru" value="<?= esc($searchMenunggu ?? '') ?>" autocomplete="off">
+                <select name="perPage" class="form-control" onchange="this.form.submit()">
+                    <option value="25" <?= ($perPage ?? 50) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPage ?? 50) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPage ?? 50) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
         </div>
         <div class="table-responsive">
             <table id="tableMenunggu" class="table table-sm table-striped">
@@ -78,7 +78,10 @@
             </table>
         </div>
         <div class="pagination-container">
-            <?= $pagerMenunggu->links('usulanMenunggu', 'default_full'); ?>
+            <?= $pagerMenunggu->links('usulanMenunggu', 'default_full', [
+                'search_menunggu' => $searchMenunggu ?? '',
+                'perPage' => $perPage ?? 50
+            ]) ?>
         </div>
         <!-- Detail Data -->
         <div id="detailData" class="detail-container" style="display: none;">
@@ -233,23 +236,22 @@
     <!-- Tabel Sudah Ditelaah -->
     <div class="col-md-6">
         <div class="filter-section">
-            <label class="text-primary"><i class="fas fa-info-circle"></i> 04.2. Sudah Ditelaah</label>              
-            <div class="d-flex">
-                <input type="text" id="filterDitelaah" class="form-control filter-input" placeholder="Filter Nama Guru" onkeyup="filterTable('tableDitelaah', this.value)">
-                <!-- Dropdown untuk Filter Status -->
-                <select id="filterStatusTelaah" class="form-control" onchange="filterStatus()">
-                    <option value="">Status</option>
-                    <option value="Disetujui">Disetujui</option>
-                    <option value="Ditolak">Ditolak</option>
+            <label class="text-primary"><i class="fas fa-info-circle"></i> 04.2. Sudah Ditelaah</label>
+            <form method="get" id="formDitelaah" class="d-flex">
+                <input type="text" name="search_ditelaah" class="form-control filter-input" 
+                    placeholder="Filter Nama Guru" value="<?= esc($searchDitelaah ?? '') ?>" autocomplete="off">
+                <select name="status_filter" class="form-control" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="Disetujui" <?= ($statusFilter ?? '') == 'Disetujui' ? 'selected' : '' ?>>Disetujui</option>
+                    <option value="Ditolak" <?= ($statusFilter ?? '') == 'Ditolak' ? 'selected' : '' ?>>Ditolak</option>
                 </select>
-                <form method="get" id="perPageFormDitelaah">
-                    <select name="perPage" class="form-control" onchange="document.getElementById('perPageFormDitelaah').submit();">
-                        <option value="25" <?= $perPage == 25 ? 'selected' : '' ?>>25</option>
-                        <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
-                        <option value="100" <?= $perPage == 100 ? 'selected' : '' ?>>100</option>
-                    </select>
-                </form>
-            </div>
+                <select name="perPage" class="form-control" onchange="this.form.submit()">
+                    <option value="25" <?= ($perPage ?? 50) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPage ?? 50) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPage ?? 50) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
         </div>
         <div class="table-responsive">
             <table id="tableDitelaah" class="table table-sm table-striped">
@@ -295,7 +297,10 @@
             </table>
         </div>
         <div class="pagination-container">
-            <?= $pagerDitelaah->links('usulanDitelaah', 'default_full'); ?>
+            <?= $pagerDitelaah->links('usulanDitelaah', 'default_full', [
+                'search_ditelaah' => $searchDitelaah ?? '',
+                'perPage' => $perPage ?? 50
+            ]) ?>
         </div>
         <!-- Detail Data Tabel Kanan -->
         <div id="detailDataKanan" class="detail-container" style="overflow-x: auto;">
@@ -429,7 +434,7 @@
         }
     });
 
-
+/*
     function filterTable(tableId, searchValue) {
         const table = document.getElementById(tableId);
         const rows = table.getElementsByTagName('tr');
@@ -449,7 +454,7 @@
             rows[i].style.display = match ? '' : 'none';
         }
     }
-
+*/
 function showDetail(data) {
     // BAGIAN 1: Informasi Usulan Guru
     document.getElementById('detailNomorUsulan').textContent = data.nomor_usulan || '-';
@@ -876,7 +881,36 @@ function batalkanTelaah(nomorUsulan) {
     });
 }
 
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
+document.addEventListener("DOMContentLoaded", function () {
+    // Debounce untuk input search menunggu
+    const inputMenunggu = document.querySelector('input[name="search_menunggu"]');
+    if (inputMenunggu) {
+        inputMenunggu.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+
+    // Debounce untuk input search ditelaah
+    const inputDitelaah = document.querySelector('input[name="search_ditelaah"]');
+    if (inputDitelaah) {
+        inputDitelaah.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+});
 
 </script>
 
