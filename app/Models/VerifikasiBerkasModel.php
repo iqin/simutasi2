@@ -42,7 +42,7 @@ class VerifikasiBerkasModel extends Model
     }
     Kode penggantinya dibawah ini:
     */
-    public function getUsulanByStatus($status, $cabangDinasIds = null, $perPage = 10, $paginationGroup = 'page_status03')
+    public function getUsulanByStatus($status, $cabangDinasIds = null, $perPage = 10, $paginationGroup = 'page_status03', $search = '')
     {
         $query = $this->select('
                         usulan.*, 
@@ -76,6 +76,9 @@ class VerifikasiBerkasModel extends Model
 
         if (!empty($cabangDinasIds)) {
             $query->whereIn('usulan.cabang_dinas_id', $cabangDinasIds);
+        }
+        if (!empty($search)) {
+            $query->like('usulan.guru_nama', $search);
         }
 
         return $query->paginate($perPage, $paginationGroup);
@@ -111,7 +114,7 @@ class VerifikasiBerkasModel extends Model
     }
     Kode yang baru dibawah ini:
     */
-    public function getUsulanWithDokumenPaginated($statuses, $cabangDinasIds = null, $perPage = 10, $paginationGroup = 'page_status04')
+    public function getUsulanWithDokumenPaginated($statuses, $cabangDinasIds = null, $perPage = 10, $paginationGroup = 'page_status04', $search = '', $statusFilter = '')
     {
         $query = $this->select('
                         usulan.*, 
@@ -146,7 +149,12 @@ class VerifikasiBerkasModel extends Model
         if (!empty($cabangDinasIds)) {
             $query->whereIn('usulan.cabang_dinas_id', $cabangDinasIds);
         }
-
+        if (!empty($search)) {
+            $query->like('usulan.guru_nama', $search);
+        }
+        if (!empty($statusFilter)) {
+            $query->where('pu.status_usulan_cabdin', $statusFilter); // filter tambahan
+        }
         return $query->paginate($perPage, $paginationGroup);
     }
 

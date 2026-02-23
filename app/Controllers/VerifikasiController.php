@@ -24,7 +24,12 @@ class VerifikasiController extends BaseController
     {
         $role = session()->get('role');
         $userId = session()->get('id');
-        $perPage = 10;
+        $perPage = $this->request->getVar('perPage') ?: 10;
+        $statusFilter = $this->request->getGet('status_filter');
+
+        // Ambil parameter pencarian untuk masing-masing tabel
+        $searchMenunggu = $this->request->getGet('search_menunggu');
+        $searchDiverifikasi = $this->request->getGet('search_diverifikasi');
 
         $db = \Config\Database::connect();
         $cabangDinasIds = [];
@@ -44,12 +49,16 @@ class VerifikasiController extends BaseController
             }
         }
 
-        // Ambil daftar usulan menunggu verifikasi
-        $usulanMenunggu = $this->verifikasiBerkasModel->getUsulanByStatus('Terkirim', $cabangDinasIds, $perPage, 'page_status03');
+         // Panggil model dengan menyertakan parameter pencarian
+        $usulanMenunggu = $this->verifikasiBerkasModel->getUsulanByStatus(
+            'Terkirim', $cabangDinasIds, $perPage, 'page_status03', $searchMenunggu
+            );
         $pagerMenunggu = $this->verifikasiBerkasModel->pager;
 
-        // Ambil daftar usulan yang sudah diverifikasi
-        $usulanDiverifikasi = $this->verifikasiBerkasModel->getUsulanWithDokumenPaginated(['Lengkap', 'TdkLengkap'], $cabangDinasIds, $perPage, 'page_status04');
+        // Ambil daftar usulan yang sudah diverifikasi dengan menyertakan parameter pencarian
+        $usulanDiverifikasi = $this->verifikasiBerkasModel->getUsulanWithDokumenPaginated(
+            ['Lengkap', 'TdkLengkap'], $cabangDinasIds, $perPage, 'page_status04', $searchDiverifikasi, $statusFilter
+            );
         $pagerDiverifikasi = $this->verifikasiBerkasModel->pager;
 
         // Kabid hanya bisa melihat (readonly)
@@ -62,6 +71,10 @@ class VerifikasiController extends BaseController
             'usulanDiverifikasi' => $usulanDiverifikasi,
             'pagerDiverifikasi' => $pagerDiverifikasi,
             'readonly' => $readonly, // ✅ Kabid hanya bisa melihat
+            'perPage' => $perPage,
+            'searchMenunggu' => $searchMenunggu,
+            'searchDiverifikasi' => $searchDiverifikasi,
+            'statusFilter' => $statusFilter,
         ];
 
         return view('verifikasi/index', $data);
@@ -127,10 +140,49 @@ class VerifikasiController extends BaseController
                     ]);
             }
 
+        // 🔔 KIRIM EMAIL NOTIFIKASI KE GURU
+        helper('phpmailer');
+        $usulanModel = new \App\Models\UsulanModel();
+        $usulan = $usulanModel->where('nomor_usulan', $nomorUsulan)->first();
+
+        if ($usulan && !empty($usulan['email'])) {
+            $jenisLabel = match ($usulan['jenis_usulan']) {
+                'mutasi_tetap' => 'Mutasi',
+                'nota_dinas'   => 'Nota Dinas',
+                'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                default => $usulan['jenis_usulan']
+            };
+
+            $catatanTampil = !empty($catatan) ? htmlspecialchars($catatan) : '-';
+
+            if ($status === 'Lengkap') {
+                $pesanUtama = "Berkas usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah diverifikasi dan dinyatakan <strong>Lengkap</strong> oleh Dinas Provinsi. Selanjutnya akan diproses oleh Kabid GTK.";
+                $statusText = "03 - Verifikasi Berkas {$jenisLabel} Lengkap – Menunggu Telaah Kabid GTK";
+                $subject = "SIMUTASI 03 - Verifikasi Berkas {$jenisLabel} Anda dinyatakan Lengkap";
+            } else {
+                $pesanUtama = "Berkas usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> dinyatakan <strong>Tidak Lengkap</strong> oleh Dinas Provinsi.<br><br><strong>Catatan:</strong> {$catatanTampil}<br><br>Silakan hubungi operator Cabang Dinas untuk informasi lebih lanjut.";
+                $statusText = "02 - Verifikasi Berkas Tidak Lengkap";
+                $subject = "SIMUTASI 02 - Verifikasi Berkas {$jenisLabel} Anda dinyatakan Tidak Lengkap";
+            }
+
+            $link = base_url('lacak-mutasi');
+
+            $message = getEmailTemplate(
+                $usulan['guru_nama'],
+                $jenisLabel,
+                $nomorUsulan,
+                $pesanUtama,
+                $statusText,
+                $link
+            );
+
+            send_email_phpmailer($usulan['email'], $subject, $message);
+        }
+
             return $this->response->setJSON(['success' => 'Verifikasi berhasil diperbarui.']);
         } 
         catch (\Exception $e) {
-        return $this->response->setJSON(['error' => $e->getMessage()])->setStatusCode(500);
+            return $this->response->setJSON(['error' => $e->getMessage()])->setStatusCode(500);
         }
     }
 

@@ -7,10 +7,24 @@
 <div class="row">
     <!-- Tabel 03: Usulan Menunggu Verifikasi -->
     <div class="col-md-6">
-    <div class="filter-section">
-        <label class="text-primary"><i class="fas fa-info-circle"></i> 03.1: Menunggu Verifikasi</label>
-        <input type="text" id="filterMenunggu" class="form-control filter-input" placeholder="Filter Nama Guru" onkeyup="filterTable('tableMenunggu', this.value)">
-    </div>
+        <div class="filter-section">
+            <label class="text-primary"><i class="fas fa-info-circle"></i> 03.1: Menunggu Verifikasi</label>
+            <!-- PERUBAHAN 1: Input filter dibungkus dalam form GET dengan name search_menunggu -->
+            <form method="get" id="formMenunggu" class="d-flex">
+                <input type="text" name="search_menunggu" class="form-control filter-input" 
+                       placeholder="Filter Nama Guru" value="<?= esc($searchMenunggu ?? '') ?>" 
+                       autocomplete="off">
+                <!-- PERUBAHAN 2: Dropdown perPage dipindahkan ke dalam form agar ikut tersubmit -->
+                <select name="perPage" class="form-control" onchange="this.form.submit()">
+                    <option value="10" <?= ($perPage ?? 10) == 10 ? 'selected' : '' ?>>10</option>
+                    <option value="25" <?= ($perPage ?? 10) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPage ?? 10) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPage ?? 10) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <!-- Tombol submit sebagai fallback jika JavaScript mati -->
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
+        </div>
         <div class="table-responsive">
             <table id="tableMenunggu" class="table table-sm table-striped">
                 <thead>
@@ -46,15 +60,19 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" class="text-center">Data pada Cabang Dinas tidak ditemukan.</td>
+                            <td colspan="5" class="text-center">Data Usulan tidak ditemukan.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+        <!-- PERUBAHAN 3: Pagination dengan parameter pencarian -->
         <?php if (!empty($pagerMenunggu)) : ?>
             <div class="pagination-container">
-                <?= $pagerMenunggu->links('page_status03', 'default_full'); ?>
+                <?= $pagerMenunggu->links('page_status03', 'default_full', [
+                    'search_menunggu' => $searchMenunggu ?? '',
+                    'perPage' => $perPage ?? 10
+                ]) ?>
             </div>
         <?php endif; ?>
         <!-- Detail Usulan -->
@@ -195,13 +213,23 @@
     <div class="col-md-6">
         <div class="filter-section">
             <label class="text-primary"><i class="fas fa-info-circle"></i> 03.2: Usulan Diverifikasi</label>
-            <input type="text" id="filterDiverifikasi" class="form-control filter-input" placeholder="Filter Nama Guru" onkeyup="filterTable('tableDiverifikasi', this.value)">
-            <!-- Dropdown untuk Filter Status -->
-            <select id="filterStatusVerifikasi" class="form-control" onchange="filterStatus()">
-                <option value="">Status</option>
-                <option value="Lengkap">Lengkap</option>
-                <option value="TdkLengkap">TdkLengkap</option>
-            </select>
+            <!-- PERUBAHAN 4: Form untuk tabel kanan dengan name search_diverifikasi -->
+            <form method="get" id="formDiverifikasi" class="d-flex">
+                <input type="text" name="search_diverifikasi" class="form-control filter-input" 
+                    placeholder="Filter Nama Guru" value="<?= esc($searchDiverifikasi ?? '') ?>" autocomplete="off">
+                <select name="status_filter" class="form-control" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="Lengkap" <?= ($statusFilter ?? '') == 'Lengkap' ? 'selected' : '' ?>>Lengkap</option>
+                    <option value="TdkLengkap" <?= ($statusFilter ?? '') == 'TdkLengkap' ? 'selected' : '' ?>>TdkLengkap</option>
+                </select>
+                <select name="perPage" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                    <option value="10" <?= ($perPage ?? 10) == 10 ? 'selected' : '' ?>>10</option>
+                    <option value="25" <?= ($perPage ?? 10) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPage ?? 10) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPage ?? 10) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
         </div>
         <div class="table-responsive">
             <table id="tableDiverifikasi" class="table table-sm table-striped">
@@ -246,10 +274,14 @@
                 </tbody>
             </table>
         </div>
-
+        <!-- PERUBAHAN 5: Pagination dengan parameter pencarian -->
         <?php if (!empty($pagerDiverifikasi)) : ?>
             <div class="pagination-container">
-                <?= $pagerDiverifikasi->links('page_status04', 'default_full'); ?>
+                <?= $pagerDiverifikasi->links('page_status04', 'default_full', [
+                    'search_diverifikasi' => $searchDiverifikasi ?? '',
+                    'perPage' => $perPage ?? 10,
+                    'status_filter' => $statusFilter ?? ''
+                ]) ?>
             </div>
         <?php endif; ?>
         <div id="detailDataDiverifikasi" class="detail-container" style="display: none;" >
@@ -364,26 +396,48 @@
         }
     });
 
-    function filterTable(tableId, searchValue) {
-        const table = document.getElementById(tableId);
-        const rows = table.getElementsByTagName('tr');
-        const value = searchValue.toLowerCase();
-
-        for (let i = 1; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName('td');
-            let match = false;
-
-            for (let j = 0; j < cells.length; j++) {
-                if (cells[j].textContent.toLowerCase().includes(value)) {
-                    match = true;
-                    break;
-                }
+// PERUBAHAN 6: Hapus fungsi filterTable, tambahkan debounce
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+document.addEventListener("DOMContentLoaded", function () {
+    // Event listener untuk tombol lihat berkas (tetap)
+    let lihatBerkasBtn = document.getElementById("lihatBerkasBtn");
+    if (lihatBerkasBtn) {
+        lihatBerkasBtn.addEventListener("click", function () {
+            let nomorUsulan = document.getElementById("detailNomorUsulan").textContent;
+            if (!nomorUsulan) {
+                alert("Nomor usulan tidak tersedia.");
+                return;
             }
-
-            rows[i].style.display = match ? '' : 'none';
-        }
+            showBerkasModal(nomorUsulan);
+        });
     }
 
+    // PERUBAHAN 7: Debounce untuk input search menunggu
+    const inputMenunggu = document.querySelector('input[name="search_menunggu"]');
+    if (inputMenunggu) {
+        inputMenunggu.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+
+    // PERUBAHAN 8: Debounce untuk input search diverifikasi
+    const inputDiverifikasi = document.querySelector('input[name="search_diverifikasi"]');
+    if (inputDiverifikasi) {
+        inputDiverifikasi.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+});
 function showDetail(data) {
     // BAGIAN 1: Informasi Usulan Guru
     document.getElementById('detailNomorUsulan').textContent = data.nomor_usulan || '-';
