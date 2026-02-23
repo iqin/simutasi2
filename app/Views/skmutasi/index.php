@@ -10,18 +10,19 @@
     <div class="col-md-6">
         <div class="filter-section">
             <label class="text-primary"><i class="fas fa-info-circle"></i> 07.1. Belum ada SK Mutasi / ND</label>
-            <div class="d-flex">
-                <input type="text" id="filterNamaGuruKiri" class="form-control filter-input" placeholder="Filter Nama Guru..." onkeyup="filterTable('tableKiri', this.value)">
-                <!-- Pilihan jumlah data per halaman -->
-                <form method="get" id="perPageKiriForm">
-                    <select name="perPageKiri" class="form-control w-auto d-inline-block" onchange="document.getElementById('perPageKiriForm').submit();">
-                        <option value="10" <?= $perPageKiri == 10 ? 'selected' : '' ?>>10</option>
-                        <option value="25" <?= $perPageKiri == 25 ? 'selected' : '' ?>>25</option>
-                        <option value="50" <?= $perPageKiri == 50 ? 'selected' : '' ?>>50</option>
-                        <option value="100" <?= $perPageKiri == 100 ? 'selected' : '' ?>>100</option>
-                    </select>
-                </form>
-            </div>
+            <!-- PERUBAHAN: form GET dengan input search dan select perPage -->
+            <form method="get" id="formKiri" class="d-flex flex-wrap align-items-center gap-2">
+                <input type="text" name="search_kiri" class="form-control form-control-sm" 
+                    placeholder="Cari Nama atau Nomor Usulan" value="<?= esc($searchKiri ?? '') ?>" 
+                    autocomplete="off" style="min-width: 150px; flex:2;">
+                <select name="perPageKiri" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                    <option value="10" <?= ($perPageKiri ?? 10) == 10 ? 'selected' : '' ?>>10</option>
+                    <option value="25" <?= ($perPageKiri ?? 10) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPageKiri ?? 10) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPageKiri ?? 10) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
         </div>
         <div class="table-responsive">
             <table id="tableKiri" class="table table-sm table-striped">
@@ -168,7 +169,10 @@
         </div>
                 <!-- Pagination -->
             <div class="pagination-container">
-                <?= $pagerKiri->links('usulanKiri', 'default_full'); ?>
+                    <?= $pagerKiri->links('usulanKiri', 'default_full', [
+                    'search_kiri' => $searchKiri ?? '',
+                    'perPageKiri' => $perPageKiri ?? 10
+                ]) ?>
 
             </div>
     </div>
@@ -177,20 +181,19 @@
         <div class="table-container">
             <!-- Baris Header -->
             <div class="filter-section">
-                <label class="text-primary"><i class="fas fa-info-circle"></i> 07.2: Usulan (Telah Terbit SK Mutasi / ND)</label>
-                <div class="d-flex align-items-center">
-                    <input type="text" id="searchSkInput" class="form-control form-control-sm me-2"
-                        placeholder="Nama Guru / Nomor Usulan" onkeyup="filterSkTable()" style="max-width: 250px;">
-
-                    <form method="get" id="perPageSkForm">
-                        <select name="perPageSk" class="form-control form-control-sm"
-                                onchange="document.getElementById('perPageSkForm').submit();">
-                            <option value="25" <?= $perPageKanan == 25 ? 'selected' : '' ?>>25</option>
-                            <option value="50" <?= $perPageKanan == 50 ? 'selected' : '' ?>>50</option>
-                            <option value="100" <?= $perPageKanan == 100 ? 'selected' : '' ?>>100</option>
-                        </select>
-                    </form>
-                </div>
+                <label class="text-primary"><i class="fas fa-info-circle"></i> 07.2: Telah Terbit SK Mutasi/ND</label>
+                <!-- PERUBAHAN: form GET dengan input search dan select perPage -->
+                <form method="get" id="formKanan" class="d-flex flex-wrap align-items-center gap-2">
+                    <input type="text" name="search_kanan" class="form-control form-control-sm" 
+                        placeholder="Cari Nama atau Nomor Usulan" value="<?= esc($searchKanan ?? '') ?>" 
+                        autocomplete="off" style="min-width: 150px; flex:2;">
+                    <select name="perPageKanan" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                        <option value="25" <?= ($perPageKanan ?? 25) == 25 ? 'selected' : '' ?>>25</option>
+                        <option value="50" <?= ($perPageKanan ?? 25) == 50 ? 'selected' : '' ?>>50</option>
+                        <option value="100" <?= ($perPageKanan ?? 25) == 100 ? 'selected' : '' ?>>100</option>
+                    </select>
+                    <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+                </form>
             </div>
 
             <!-- Tabel SK Mutasi / Nota Dinas -->
@@ -276,7 +279,10 @@
 
             <!-- Pagination -->
             <div class="pagination-container">
-                <?= $pagerKanan->links('usulanKanan', 'default_full') ?>
+                    <?= $pagerKanan->links('usulanKanan', 'default_full', [
+                        'search_kanan' => $searchKanan ?? '',
+                        'perPageKanan' => $perPageKanan ?? 25
+                    ]) ?>
             </div>
         </div>
 
@@ -315,13 +321,6 @@
     </div>
 
     <script>
-    function filterSkTable() {
-        const q = (document.getElementById('searchSkInput').value || '').toLowerCase();
-        document.querySelectorAll('#tableSk tbody tr').forEach(tr => {
-            const hay = tr.getAttribute('data-search') || tr.textContent.toLowerCase();
-            tr.style.display = hay.includes(q) ? '' : 'none';
-        });
-    }
 
     function showDetailSk(data) {
         document.getElementById("detailIdSkmutasi").value = data.id_skmutasi || '';
@@ -533,6 +532,37 @@ function confirmDelete(url) {
         }
     });
 }
+
+// TAMBAHAN: debounce untuk submit otomatis saat mengetik
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Debounce untuk input search kiri
+    const inputKiri = document.querySelector('input[name="search_kiri"]');
+    if (inputKiri) {
+        inputKiri.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+
+    // Debounce untuk input search kanan
+    const inputKanan = document.querySelector('input[name="search_kanan"]');
+    if (inputKanan) {
+        inputKanan.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+});
 
 </script>
 

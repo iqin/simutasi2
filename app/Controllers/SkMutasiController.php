@@ -46,7 +46,10 @@ class SkMutasiController extends Controller
 
         // per halaman
         $perPageKiri = (int)($this->request->getGet('perPageKiri') ?: 10);
-        $perPageSk   = (int)($this->request->getGet('perPageSk')   ?: 25); // <- sinkron dg nama select di view
+        $perPageKanan = (int)($this->request->getGet('perPageKanan') ?: 25); // <- sinkron dg nama select di view
+
+        $searchKiri = $this->request->getGet('search_kiri');
+        $searchKanan = $this->request->getGet('search_kanan');
 
         // ====== TABEL KIRI: usulan status 05/06 ======
         $queryKiri = $this->usulanModel
@@ -68,7 +71,13 @@ class SkMutasiController extends Controller
         if ($role === 'dinas') {
             $queryKiri->whereIn('usulan.cabang_dinas_id', $cabangDinasIds);
         }
-
+        // TAMBAHAN: filter pencarian untuk tabel kiri
+        if (!empty($searchKiri)) {
+            $queryKiri->groupStart()
+                ->like('usulan.guru_nama', $searchKiri)
+                ->orLike('usulan.nomor_usulan', $searchKiri)
+                ->groupEnd();
+        }
         // hitung apakah nomor_usulan tsb sudah punya ND (ND / PND)
         $ndRows = $db->table('sk_mutasi')
             ->select('nomor_usulan')
@@ -102,8 +111,14 @@ class SkMutasiController extends Controller
         if ($role === 'dinas') {
             $queryKanan->whereIn('usulan.cabang_dinas_id', $cabangDinasIds);
         }
-
-        $usulanKanan = $queryKanan->paginate($perPageSk, 'usulanKanan');
+        // TAMBAHAN: filter pencarian untuk tabel kanan
+        if (!empty($searchKanan)) {
+            $queryKanan->groupStart()
+                ->like('usulan.guru_nama', $searchKanan)
+                ->orLike('sk_mutasi.nomor_usulan', $searchKanan)
+                ->groupEnd();
+        }
+        $usulanKanan = $queryKanan->paginate($perPageKanan, 'usulanKanan');
         $pagerKanan  = $this->skMutasiModel->pager;
 
         return view('skmutasi/index', [
@@ -112,7 +127,9 @@ class SkMutasiController extends Controller
             'usulanKanan'    => $usulanKanan,
             'pagerKanan'     => $pagerKanan,
             'perPageKiri'    => $perPageKiri,
-            'perPageKanan'   => $perPageSk,     // variabel yg dipakai di view
+            'perPageKanan'   => $perPageKanan,     // variabel yg dipakai di view
+            'searchKiri'     => $searchKiri,
+            'searchKanan'    => $searchKanan, 
             'hasNdByUsulan'  => $hasNdByUsulan,
         ]);
     }
@@ -283,10 +300,37 @@ class SkMutasiController extends Controller
                 ]);
             }
         }
+        // 🔔 KIRIM NOTIFIKASI EMAIL
+        $usulanData = $this->usulanModel->where('nomor_usulan', $nomorUsulan)->first();
+        if ($usulanData && !empty($usulanData['email'])) {
+            helper('phpmailer');
+            $jenisLabel = match ($usulanData['jenis_usulan']) {
+                'mutasi_tetap' => 'Mutasi',
+                'nota_dinas'   => 'Nota Dinas',
+                'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                default => $usulanData['jenis_usulan']
+            };
+
+            $pesanUtama = "Dokumen <strong>{$jenisMutasi}</strong> untuk usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah terbit. Silakan unduh dokumen tersebut di halaman lacak usulan.";
+            $statusSekarang = $usulanData['status']; // sudah terupdate
+            $statusText = "{$statusSekarang} - {$jenisMutasi} untuk Usulan {$jenisLabel} Telah Terbit.";
+            $link = base_url('lacak-mutasi');
+            $subject = "SIMUTASI {$statusSekarang} - Dokumen {$jenisMutasi} untuk Usulan {$jenisLabel} Telah Terbit";
+
+            $message = getEmailTemplate(
+                $usulanData['guru_nama'],
+                $jenisLabel,
+                $nomorUsulan,
+                $pesanUtama,
+                $statusText,
+                $link
+            );
+
+            send_email_phpmailer($usulanData['email'], $subject, $message);
+        }
 
         return redirect()->to('/skmutasi')->with('success', "$jenisMutasi berhasil diunggah.");
     }
-
 
 
     public function update()
@@ -306,7 +350,7 @@ class SkMutasiController extends Controller
 
         // **Format nama file baru**
         $tanggalFormatted = date('Ymd', strtotime($tanggalSK));
-        $fileName = "{$nomorUsulan}-{$tanggalFormatted}.pdf"; // Format baru
+        $fileName = "{$nomorUsulan}-{$tanggalFormatted}.pdf";
 
         // **Direktori penyimpanan**
         $uploadPath = WRITEPATH . 'uploads/sk_mutasi';
@@ -314,7 +358,7 @@ class SkMutasiController extends Controller
 
         // **Jika ada file baru yang diunggah**
         if ($file && $file->isValid() && $file->getMimeType() === 'application/pdf') {
-            if ($file->getSize() > 1024 * 1024) { // Maksimal 1MB
+            if ($file->getSize() > 1024 * 1024) {
                 return redirect()->back()->with('error', 'Ukuran file tidak boleh lebih dari 1 MB.');
             }
 
@@ -343,7 +387,7 @@ class SkMutasiController extends Controller
 
         $this->skMutasiModel->update($idSkMutasi, $updateData);
 
-        // **Update catatan history berdasarkan jenis mutasi & apakah file diperbarui**
+        // **Update catatan history**
         if ($fileUpdated) {
             $catatanHistory = ($jenisMutasi === 'SK Mutasi') 
                 ? 'SK Mutasi diperbaharui (dapat diunduh)' 
@@ -354,42 +398,56 @@ class SkMutasiController extends Controller
                 : 'Nota Dinas diperbaharui (tanpa perubahan file)';
         }
 
-       // **Cek apakah nomor_usulan dengan status = 07 sudah ada di tabel usulan_status_history**
         $db = \Config\Database::connect();
         $existingHistory = $db->table('usulan_status_history')
-                              ->where('nomor_usulan', $nomorUsulan)
-                              ->where('status', '07')
-                              ->get()
-                              ->getRowArray();
+            ->where('nomor_usulan', $nomorUsulan)
+            ->where('status', '07')
+            ->get()
+            ->getRowArray();
 
         if ($existingHistory) {
-            // **Jika sudah ada, lakukan UPDATE**
             $db->table('usulan_status_history')
-               ->where('nomor_usulan', $nomorUsulan)
-               ->where('status', '07')
-               ->update(['catatan_history' => $catatanHistory]);
+            ->where('nomor_usulan', $nomorUsulan)
+            ->where('status', '07')
+            ->update(['catatan_history' => $catatanHistory]);
         } else {
-            // **Jika belum ada, lakukan INSERT**
             $db->table('usulan_status_history')->insert([
                 'nomor_usulan' => $nomorUsulan,
                 'status' => '07',
                 'catatan_history' => $catatanHistory
             ]);
         }
+        // 🔔 KIRIM NOTIFIKASI EMAIL
+        $usulanData = $this->usulanModel->where('nomor_usulan', $nomorUsulan)->first();
+        if ($usulanData && !empty($usulanData['email'])) {
+            helper('phpmailer');
+            $jenisLabel = match ($usulanData['jenis_usulan']) {
+                'mutasi_tetap' => 'Mutasi',
+                'nota_dinas'   => 'Nota Dinas',
+                'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                default => $usulanData['jenis_usulan']
+            };
+
+            $fileInfo = $fileUpdated ? "File baru telah diunggah." : "Data dokumen (nomor/tanggal) diperbarui tanpa perubahan file.";
+            $pesanUtama = "Dokumen <strong>{$jenisMutasi}</strong> untuk usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah diperbarui. {$fileInfo}";
+            $statusText = "07 - Dokumen Telah Diperbarui";
+            $link = base_url('lacak-mutasi');
+            $subject = "SIMUTASI 07 - Dokumen {$jenisMutasi} untuk Usulan {$jenisLabel} Telah Diperbarui";
+
+            $message = getEmailTemplate(
+                $usulanData['guru_nama'],
+                $jenisLabel,
+                $nomorUsulan,
+                $pesanUtama,
+                $statusText,
+                $link
+            );
+
+            send_email_phpmailer($usulanData['email'], $subject, $message);
+        }
 
         return redirect()->to('/skmutasi')->with('success', 'Data SK Mutasi berhasil diperbarui.');
     }
-
-    // SkMutasiController.php
-
-    private function respondJson(bool $ok, string $message, array $extra = [])
-    {
-        return $this->response
-            ->setContentType('application/json')
-            ->setStatusCode(200)
-            ->setJSON(array_merge(['success' => $ok, 'message' => $message], $extra));
-    }
-
     public function delete($idSkMutasi)
     {
         $db = \Config\Database::connect();
@@ -400,10 +458,13 @@ class SkMutasiController extends Controller
             ->first();
 
         if (!$row) {
-            return $this->respondJson(false, 'Data dokumen tidak ditemukan.');
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON(['success' => false, 'message' => 'Data dokumen tidak ditemukan.']);
         }
 
         $nomorUsulan = $row['nomor_usulan'];
+        $jenisMutasi = $row['jenis_mutasi']; // simpan jenis dokumen
 
         // 2) Hapus file fisik (jika ada)
         $filePath = WRITEPATH . 'uploads/sk_mutasi/' . $row['file_skmutasi'];
@@ -414,7 +475,7 @@ class SkMutasiController extends Controller
         // 3) Hapus baris dokumen
         $this->skMutasiModel->delete($idSkMutasi);
 
-        // 4) Hitung sisa dokumen untuk nomor_usulan ini
+        // 4) Hitung sisa dokumen
         $remaining = $this->skMutasiModel
             ->where('nomor_usulan', $nomorUsulan)
             ->findAll();
@@ -429,18 +490,14 @@ class SkMutasiController extends Controller
             if ($r['jenis_mutasi'] === 'Nota Dinas Perpanjangan') $hasPnd = true;
         }
 
-        // 5) Tentukan status baru berdasarkan jenis usulan
+        // 5) Tentukan status baru
         $usulan = $this->usulanModel->where('nomor_usulan', $nomorUsulan)->first();
         $jenisUsulan = $usulan['jenis_usulan'] ?? null;
 
-        // default: jika tidak ada dokumen sisa -> kembali ke 06
         $newStatus = '06';
-
         if ($jenisUsulan === 'mutasi_tetap') {
-            // Mutasi Tetap selesai (07) hanya kalau ada SK Mutasi
             $newStatus = $hasSk ? '07' : '06';
         } else {
-            // ND / Perpanjangan ND selesai (07) bila masih ada dokumen ND/PND
             $newStatus = (!empty($remaining)) ? '07' : '06';
         }
 
@@ -449,9 +506,8 @@ class SkMutasiController extends Controller
             ->set(['status' => $newStatus])
             ->update();
 
-        // 7) Sinkronkan riwayat status (07)
+        // 7) Sinkronkan riwayat status 07
         if ($newStatus === '07') {
-            // Pilih catatan yang paling “kuat”
             $catatan = 'Nota Dinas (dapat diunduh)';
             if ($hasSk) {
                 $catatan = 'SK Mutasi (dapat diunduh)';
@@ -481,14 +537,43 @@ class SkMutasiController extends Controller
                 ]);
             }
         } else {
-            // Tidak selesai lagi -> hapus history 07
             $db->table('usulan_status_history')
                 ->where('nomor_usulan', $nomorUsulan)
                 ->where('status', '07')
                 ->delete();
         }
 
-        return $this->respondJson(true, 'Berkas berhasil dihapus.');
+        // 🔔 Kirim notifikasi email
+        $usulanData = $this->usulanModel->where('nomor_usulan', $nomorUsulan)->first();
+        if ($usulanData && !empty($usulanData['email'])) {
+            helper('phpmailer');
+            $jenisLabel = match ($usulanData['jenis_usulan']) {
+                'mutasi_tetap' => 'Mutasi',
+                'nota_dinas'   => 'Nota Dinas',
+                'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                default => $usulanData['jenis_usulan']
+            };
+
+            $pesanUtama = "Dokumen <strong>{$jenisMutasi}</strong> yang sebelumnya terbit untuk usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah dibatalkan. Status usulan dikembalikan ke status sebelumnya.";
+            $statusText = "Status usulan dikembalikan ke status sebelumnya";
+            $link = base_url('lacak-mutasi');
+            $subject = "SIMUTASI {$newStatus} - Dokumen {$jenisMutasi} untuk Usulan {$jenisLabel} Dibatalkan";
+
+            $message = getEmailTemplate(
+                $usulanData['guru_nama'],
+                $jenisLabel,
+                $nomorUsulan,
+                $pesanUtama,
+                $statusText,
+                $link
+            );
+
+            send_email_phpmailer($usulanData['email'], $subject, $message);
+        }
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON(['success' => true, 'message' => 'Berkas berhasil dihapus.']);
     }
 
 
