@@ -29,12 +29,20 @@ class BerkasBKPSDMController extends BaseController
         $perPage = $this->request->getGet('perPage') ?? 25;
         $perPageBerkasDikirim = $this->request->getGet('perPageBerkasDikirim') ?? 25;
 
+        // TAMBAHAN: ambil parameter pencarian
+        $searchSiap = $this->request->getGet('search_siap');
+        $searchSudah = $this->request->getGet('search_sudah');
+
         $data = [
-            'usulanSiapKirim' => $this->berkasModel->getSiapKirim($role, $userId, $perPage),
+            'usulanSiapKirim' => $this->berkasModel->getSiapKirim($role, $userId, $perPage, $searchSiap),
             'pagerSiapKirim' => $this->berkasModel->pager,
-            'usulanSudahDikirim' => $this->berkasModel->getSudahDikirim($role, $userId, $perPageBerkasDikirim),
+            'usulanSudahDikirim' => $this->berkasModel->getSudahDikirim($role, $userId, $perPageBerkasDikirim, $searchSudah),
             'pagerSudahDikirim' => $this->berkasModel->pager,
             'perPageBerkasDikirim' => $perPageBerkasDikirim,
+            // TAMBAHAN: kirim ke view
+            'searchSiap' => $searchSiap,
+            'searchSudah' => $searchSudah,
+            'perPage' => $perPage,
         ];
 
         return view('berkasbkpsdm/index', $data);
@@ -90,6 +98,37 @@ class BerkasBKPSDMController extends BaseController
 
                 if ($db->transStatus() === false) {
                     throw new \Exception("Gagal menyimpan data.");
+                }
+
+                // 🔔 Kirim notifikasi email untuk setiap usulan
+                $usulanModel = new \App\Models\UsulanModel();
+                foreach ($nomorUsulanList as $nomorUsulan) {
+                    $usulanData = $usulanModel->where('nomor_usulan', $nomorUsulan)->first();
+                    if ($usulanData && !empty($usulanData['email'])) {
+                        helper('phpmailer');
+                        $jenisLabel = match ($usulanData['jenis_usulan']) {
+                            'mutasi_tetap' => 'Mutasi',
+                            'nota_dinas'   => 'Nota Dinas',
+                            'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                            default => $usulanData['jenis_usulan']
+                        };
+
+                        $pesanUtama = "Berkas <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah dikirim ke Badan Kepegawaian Aceh (BKA) untuk diproses lebih lanjut.";
+                        $statusText = "Berkas {$jenisLabel} anda telah dikirim ke Badan Kepegawaian Aceh (BKA)";
+                        $link = base_url('lacak-mutasi');
+                        $subject = "SIMUTASI 06 - Berkas {$jenisLabel} Anda Telah Dikirim ke BKA";
+
+                        $message = getEmailTemplate(
+                            $usulanData['guru_nama'],
+                            $jenisLabel,
+                            $nomorUsulan,
+                            $pesanUtama,
+                            $statusText,
+                            $link
+                        );
+
+                        send_email_phpmailer($usulanData['email'], $subject, $message);
+                    }
                 }
 
             return $this->response->setJSON([

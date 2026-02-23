@@ -13,7 +13,7 @@ class BerkasBKPSDMModel extends Model
         'cabang_dinas_id', 'status', 'kirimbkpsdm', 'tglkirimbkpsdm'
     ];
 
-    public function getSiapKirim($role, $userId, $perPage)
+    public function getSiapKirim($role, $userId, $perPage, $search = '')
     {
         $db = \Config\Database::connect();
         $cabangDinasIds = [];
@@ -49,11 +49,18 @@ class BerkasBKPSDMModel extends Model
         if ($role === 'dinas') {
             $query->whereIn('usulan.cabang_dinas_id', $cabangDinasIds);
         }
+                // TAMBAHAN: filter pencarian
+        if (!empty($search)) {
+            $query->groupStart()
+                ->like('usulan.guru_nama', $search)
+                ->orLike('usulan.nomor_usulan', $search)
+                ->groupEnd();
+        }
 
         return $query->orderBy('usulan.created_at', 'DESC')->paginate($perPage, 'usulanSiapKirim');
     }
 
-    public function getSudahDikirim($role, $userId, $perPage)
+    public function getSudahDikirim($role, $userId, $perPage, $search = '')
     {
         $db = \Config\Database::connect();
         $cabangDinasIds = [];
@@ -88,6 +95,13 @@ class BerkasBKPSDMModel extends Model
 
         if ($role === 'dinas') {
             $query->whereIn('usulan.cabang_dinas_id', $cabangDinasIds);
+        }
+                // TAMBAHAN: filter pencarian
+        if (!empty($search)) {
+            $query->groupStart()
+                ->like('usulan.guru_nama', $search)
+                ->orLike('usulan.nomor_usulan', $search)
+                ->groupEnd();
         }
 
         return $query->orderBy('usulan.tglkirimbkpsdm', 'DESC')->paginate($perPage, 'usulanSudahDikirim');

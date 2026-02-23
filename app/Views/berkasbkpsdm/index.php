@@ -7,7 +7,17 @@
     <div class="col-md-6">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <label class="text-primary"><i class="fas fa-info-circle"></i> 06.1. Berkas Siap Dikirim</label>
-        <input type="text" id="filterNamaGuru" class="form-control w-50" placeholder="Filter Nama GTK..." onkeyup="filterTable('tableSiapKirim', this.value)">
+            <form method="get" id="formSiapKirim" class="d-flex flex-wrap align-items-center gap-2">
+                <input type="text" name="search_siap" class="form-control form-control-sm" 
+                       placeholder="Cari Nama atau Nomor Usulan" value="<?= esc($searchSiap ?? '') ?>" 
+                       autocomplete="off" style="min-width: 200px; flex:2;">
+                <select name="perPage" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                    <option value="25" <?= ($perPage ?? 25) == 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= ($perPage ?? 25) == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= ($perPage ?? 25) == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+                <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+            </form>
     </div>
         <div class="table-responsive">
             <table id="tableSiapKirim" class="table table-sm table-striped">
@@ -56,7 +66,10 @@
         </div>
             <!-- Pagination -->
         <div class="pagination-container">
-            <?= $pagerSiapKirim->links('usulanSiapKirim', 'default_full'); ?>
+            <?= $pagerSiapKirim->links('usulanSiapKirim', 'default_full', [
+                'search_siap' => $searchSiap ?? '',
+                'perPage' => $perPage ?? 25
+            ]) ?>
         </div>
                 <!-- Tabel Baru: 06.1.1 Data Akan Dikirim -->
         <div id="dataAkanDikirimContainer" class="mt-3 p-3 border rounded shadow-sm" style="display: none;">
@@ -181,13 +194,16 @@
         <div class="filter-section">
             <label class="text-primary"><i class="fas fa-info-circle"></i> 06.2. Berkas Sudah Dikirim</label>
             <div class="d-flex">
-                <input type="text" id="filterBerkasDikirim" class="form-control filter-input" placeholder="Nama GTK..." onkeyup="filterTableBerkasDikirim()">
-                <form method="get" id="perPageBerkasDikirimForm">
-                    <select name="perPageBerkasDikirim" class="form-control" onchange="document.getElementById('perPageBerkasDikirimForm').submit();">
-                        <option value="25" <?= $perPageBerkasDikirim == 25 ? 'selected' : '' ?>>25</option>
-                        <option value="50" <?= $perPageBerkasDikirim == 50 ? 'selected' : '' ?>>50</option>
-                        <option value="100" <?= $perPageBerkasDikirim == 100 ? 'selected' : '' ?>>100</option>
+                <form method="get" id="formSudahKirim" class="d-flex flex-wrap align-items-center gap-2">
+                    <input type="text" name="search_sudah" class="form-control form-control-sm" 
+                        placeholder="Cari Nama atau Nomor Usulan" value="<?= esc($searchSudah ?? '') ?>" 
+                        autocomplete="off" style="min-width: 200px; flex:2;">
+                    <select name="perPageBerkasDikirim" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                        <option value="25" <?= ($perPageBerkasDikirim ?? 25) == 25 ? 'selected' : '' ?>>25</option>
+                        <option value="50" <?= ($perPageBerkasDikirim ?? 25) == 50 ? 'selected' : '' ?>>50</option>
+                        <option value="100" <?= ($perPageBerkasDikirim ?? 25) == 100 ? 'selected' : '' ?>>100</option>
                     </select>
+                    <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
                 </form>
             </div>
         </div>
@@ -227,7 +243,10 @@
         </div>
         <!-- Pagination -->
         <div class="pagination-container">
-            <?= $pagerSudahDikirim->links('usulanSudahDikirim', 'default_full'); ?>
+            <?= $pagerSudahDikirim->links('usulanSudahDikirim', 'default_full', [
+                'search_sudah' => $searchSudah ?? '',
+                'perPageBerkasDikirim' => $perPageBerkasDikirim ?? 25
+            ]) ?>
         </div>
         <!-- Detail Usulan (Ditampilkan saat tombol "View" diklik) -->
         <div id="detailDataKanan" class="detail-container">
