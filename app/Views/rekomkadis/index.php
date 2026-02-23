@@ -8,20 +8,19 @@
         <div class="table-container">
             <!-- Baris Header -->
             <div class="filter-section">
-                <label class="text-primary"><i class="fas fa-info-circle"></i> 05.3: Usulan (Belum Terbit Rekom)</label>
-                <div class="d-flex align-items-center">
-                    <!-- Pilihan jumlah data per halaman -->
-                    <form method="get" id="perPageBelumTerkaitForm">
-                        <select name="perPageBelumTerkait" class="form-control form-control-sm"
-                                onchange="document.getElementById('perPageBelumTerkaitForm').submit();">
-                            <option value="10" <?= $perPageBelumTerkait == 10 ? 'selected' : '' ?>>10</option>
-                            <option value="25" <?= $perPageBelumTerkait == 25 ? 'selected' : '' ?>>25</option>
-                            <option value="50" <?= $perPageBelumTerkait == 50 ? 'selected' : '' ?>>50</option>
-                            <option value="100" <?= $perPageBelumTerkait == 100 ? 'selected' : '' ?>>100</option>
-                        </select>
-                    </form>
-
-                </div>
+                <label class="text-primary"><i class="fas fa-info-circle"></i> 05.3: Belum Terbit Rekom</label>
+                <form method="get" id="formBelum" class="d-flex flex-wrap align-items-center gap-2">
+                    <input type="text" name="search_belum" class="form-control form-control-sm" 
+                        placeholder="Cari Nama atau Nomor Usulan" value="<?= esc($searchBelum ?? '') ?>" 
+                        autocomplete="off" style="min-width: 150px; flex:2;">
+                    <select name="perPageBelumTerkait" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                        <option value="10" <?= ($perPageBelumTerkait ?? 25) == 10 ? 'selected' : '' ?>>10</option>
+                        <option value="25" <?= ($perPageBelumTerkait ?? 25) == 25 ? 'selected' : '' ?>>25</option>
+                        <option value="50" <?= ($perPageBelumTerkait ?? 25) == 50 ? 'selected' : '' ?>>50</option>
+                        <option value="100" <?= ($perPageBelumTerkait ?? 25) == 100 ? 'selected' : '' ?>>100</option>
+                    </select>
+                    <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+                </form>
             </div>
             <div class="table-responsive">
                 <table class="table table-sm table-striped">
@@ -87,7 +86,10 @@
             </div>
             <!-- Pagination untuk tabel 05.3 -->
             <div class="pagination-container">
-                <?= $pagerBelumTerkait->links('usulan_belum_terkait_pagination', 'default_full') ?>
+                <?= $pagerBelumTerkait->links('usulan_belum_terkait_pagination', 'default_full', [
+                    'search_belum' => $searchBelum ?? '',
+                    'perPageBelumTerkait' => $perPageBelumTerkait ?? 25
+                ]) ?>
             </div>
         </div>
     </div>
@@ -96,21 +98,18 @@
         <div class="table-container">
             <!-- Baris Header -->
             <div class="filter-section">
-                <label class="text-primary"><i class="fas fa-info-circle"></i> 05.4: Usulan (Telah Terbit Rekom)</label>
-                <div class="d-flex align-items-center">
-                    <input type="text" id="searchUsulanInput" class="form-control form-control-sm me-2"
-                        placeholder="Nama GTK / Nomor Usulan" onkeyup="filterUsulanTable()"
-                        value="<?= esc($keywordUsulan) ?>" style="max-width: 250px;">
-
-                    <form method="get" id="perPageUsulanForm">
-                        <select name="perPageUsulan" class="form-control form-control-sm"
-                                onchange="document.getElementById('perPageUsulanForm').submit();">
-                            <option value="25" <?= $perPageUsulan == 25 ? 'selected' : '' ?>>25</option>
-                            <option value="50" <?= $perPageUsulan == 50 ? 'selected' : '' ?>>50</option>
-                            <option value="100" <?= $perPageUsulan == 100 ? 'selected' : '' ?>>100</option>
-                        </select>
-                    </form>
-                </div>
+                <label class="text-primary"><i class="fas fa-info-circle"></i> 05.4: Telah Terbit Rekom</label>
+                <form method="get" id="formUsulan" class="d-flex flex-wrap align-items-center gap-2">
+                    <input type="text" name="search_usulan" class="form-control form-control-sm" 
+                        placeholder="Cari Nama atau Nomor Usulan" value="<?= esc($searchUsulan ?? '') ?>" 
+                        autocomplete="off" style="min-width: 150px; flex:2;">
+                    <select name="perPageUsulan" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                        <option value="25" <?= ($perPageUsulan ?? 25) == 25 ? 'selected' : '' ?>>25</option>
+                        <option value="50" <?= ($perPageUsulan ?? 25) == 50 ? 'selected' : '' ?>>50</option>
+                        <option value="100" <?= ($perPageUsulan ?? 25) == 100 ? 'selected' : '' ?>>100</option>
+                    </select>
+                    <noscript><button type="submit" class="btn btn-primary btn-sm">Cari</button></noscript>
+                </form>
             </div>
 
             <div class="table-responsive">
@@ -149,7 +148,10 @@
 
             <!-- Pagination untuk tabel 05.4 -->
             <div class="pagination-container">
-                <?= $pagerUsulan->links('usulan_terkait_pagination', 'default_full') ?>
+                    <?= $pagerUsulan->links('usulan_terkait_pagination', 'default_full', [
+                    'search_usulan' => $searchUsulan ?? '',
+                    'perPageUsulan' => $perPageUsulan ?? 25
+                ]) ?>
             </div>
         </div>
 
@@ -215,7 +217,7 @@
 
         let berkasRekomLink = document.getElementById("berkasRekomLink");
         if (data.file_rekomkadis) {
-            berkasRekomLink.href = "/file/rekomkadis/" + data.file_rekomkadis;
+            berkasRekomLink.href = '/uploads/rekom_kadis/' + data.file_rekomkadis;
             berkasRekomLink.style.display = "inline-block";
         } else {
             berkasRekomLink.style.display = "none";
@@ -315,6 +317,36 @@
     });
 }
 
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Debounce untuk input search tabel kiri
+    const inputBelum = document.querySelector('input[name="search_belum"]');
+    if (inputBelum) {
+        inputBelum.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+
+    // Debounce untuk input search tabel kanan
+    const inputUsulan = document.querySelector('input[name="search_usulan"]');
+    if (inputUsulan) {
+        inputUsulan.addEventListener('keyup', debounce(function() {
+            this.form.submit();
+        }, 500));
+    }
+});
 
 </script>
 
