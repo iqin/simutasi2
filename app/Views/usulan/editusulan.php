@@ -63,6 +63,14 @@
                         <label for="guruNik">NIK</label>
                         <input type="text" id="guruNik" class="form-control" value="<?= $usulan['guru_nik'] ?>" readonly>
                     </div>
+                    <div class="form-group mb-3">
+                        <label for="email">Email Aktif GTK</label>
+                        <input type="email" name="email" id="email" class="form-control" value="<?= $usulan['email'] ?? '' ?>" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="no_hp">No. HP (WhatsApp) GTK</label>
+                        <input type="text" name="no_hp" id="no_hp" class="form-control" value="<?= $usulan['no_hp'] ?? '' ?>" placeholder="08xxxxxxxxxx" required>
+                    </div>
                 </div>
 
                 <!-- Kolom Tengah -->
@@ -121,12 +129,14 @@
                         </select>
                         <input type="hidden" name="sekolah_tujuan_nama" id="sekolahTujuanNama" value="<?= $usulan['sekolah_tujuan_nama']; ?>">
                     </div>
+                    <!-- Alasan Mutasi -->
+                    <div class="form-group mb-3">
+                        <label for="alasan">Alasan Mutasi</label>
+                        <textarea name="alasan" id="alasan" class="form-control" rows="4" required><?= $usulan['alasan'] ?></textarea>
+                    </div>
                 </div>
             </div>
-            <div class="form-group mb-3">
-                <label for="alasan">Alasan Mutasi</label>
-                <textarea name="alasan" id="alasan" class="form-control" rows="3" required><?= $usulan['alasan'] ?></textarea>
-            </div>
+
             <!-- Tombol -->
             <div class="d-flex justify-content-between mt-4">
                 <a href="/usulan" class="btn btn-sm-custom btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>

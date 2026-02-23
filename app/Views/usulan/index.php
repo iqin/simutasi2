@@ -157,6 +157,14 @@
         <tr>
             <th>NIK</th>
             <td id="detailNIK"></td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td id="detailEmail"></td>
+        </tr>
+        <tr>
+            <th>No. HP</th>
+            <td id="detailNoHp"></td>
         </tr>        
         <tr>
             <th>Sekolah Asal</th>
@@ -260,7 +268,9 @@
         };            
         document.getElementById('detailNamaGuru').textContent = row.guru_nama;
         document.getElementById('detailNIP').textContent = row.guru_nip;
-        document.getElementById('detailNIK').textContent = row.guru_nik;        
+        document.getElementById('detailNIK').textContent = row.guru_nik;
+        document.getElementById('detailEmail').textContent = row.email || '-';
+        document.getElementById('detailNoHp').textContent = row.no_hp || '-';        
         document.getElementById('detailSekolahAsal').textContent = row.sekolah_asal;
         document.getElementById('detailSekolahTujuan').textContent = row.sekolah_tujuan;
         document.getElementById('detailNomorUsulan').textContent = row.nomor_usulan;

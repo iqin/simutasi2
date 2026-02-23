@@ -81,7 +81,15 @@
                 <tr>
                     <th>NIK</th>
                     <td><?= isset($usulan['nik']) ? $usulan['nik'] : 'Data tidak tersedia'; ?></td>
-                </tr>                
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td><?= isset($usulan['email']) ? $usulan['email'] : 'Data tidak tersedia'; ?></td>
+                </tr>
+                <tr>
+                    <th>No. HP</th>
+                    <td><?= isset($usulan['no_hp']) ? $usulan['no_hp'] : 'Data tidak tersedia'; ?></td>
+                </tr>                                
                 <tr>
                     <th>Asal Sekolah</th>
                     <td><?= isset($usulan['sekolah_asal']) ? $usulan['sekolah_asal'] : 'Data tidak tersedia'; ?></td>

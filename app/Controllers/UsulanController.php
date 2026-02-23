@@ -311,6 +311,8 @@ class UsulanController extends BaseController
             $guruNama           = $this->request->getPost('guru_nama');
             $guruNip            = $this->request->getPost('guru_nip');
             $guruNik            = $this->request->getPost('guru_nik');
+            $email              = $this->request->getPost('email');
+            $noHp               = $this->request->getPost('no_hp');            
             $alasan             = $this->request->getPost('alasan');
             $cabangDinasAsalId  = $this->request->getPost('cabang_dinas_asal_id');
             $sekolahAsal        = $this->request->getPost('sekolah_asal_nama');
@@ -318,7 +320,7 @@ class UsulanController extends BaseController
             $jenisUsulan        = $this->request->getPost('jenis_usulan');
 
             // 🔒 Validasi input minimal
-            if (empty($guruNip) || empty($guruNik) || empty($sekolahAsal) || empty($sekolahTujuan) || empty($cabangDinasAsalId)) {
+            if (empty($guruNip) || empty($guruNik) || empty($email) || empty($noHp) || empty($sekolahAsal) || empty($sekolahTujuan) || empty($cabangDinasAsalId)) {
                 throw new \Exception('Data tidak lengkap.');
             }
             // ===== VALIDASI BISNIS CREATE (sesuai logika terbaru) =====
@@ -427,6 +429,8 @@ class UsulanController extends BaseController
                 'guru_nama'        => $guruNama,
                 'guru_nik'         => $guruNik,
                 'guru_nip'         => $guruNip,
+                'email'            => $email,
+                'no_hp'            => $noHp,           
                 'sekolah_asal'     => $sekolahAsal,
                 'sekolah_tujuan'   => $sekolahTujuan,
                 'alasan'           => $alasan,
@@ -450,8 +454,37 @@ class UsulanController extends BaseController
 
             $this->addStatusHistory($nomorUsulan, '01', $statusKeterangan);
 
-
             $db->transCommit();
+
+            // 🔔 KIRIM EMAIL NOTIFIKASI PEMBUATAN USULAN
+            if (!empty($email)) {
+                helper('phpmailer');
+
+                $jenisLabel = match ($jenisUsulan) {
+                    'mutasi_tetap' => 'Mutasi',
+                    'nota_dinas'   => 'Nota Dinas',
+                    'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                    default        => $jenisUsulan
+                };
+
+                $pesanUtama = "Usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah berhasil diinput oleh Cabang Dinas. Gunakan nomor usulan dan NIP Anda untuk melacak perkembangan.";
+                $status = "01 - Input data usulan oleh Cabang Dinas";
+                $link = base_url('lacak-mutasi');
+
+                $message = getEmailTemplate(
+                    $guruNama,
+                    $jenisLabel,
+                    $nomorUsulan,
+                    $pesanUtama,
+                    $status,
+                    $link
+                );
+
+                $subject = "SIMUTASI 01 - Input data usulan {$jenisLabel} oleh Cabang Dinas";
+
+                send_email_phpmailer($email, $subject, $message);
+            }
+
             session()->set('nomor_usulan', $nomorUsulan);
 
             // ✅ Gabungkan flashdata success + warning
@@ -618,7 +651,6 @@ class UsulanController extends BaseController
         ]);
     }
 
-
     public function updateUsulan($id)
     {
         try {
@@ -629,33 +661,36 @@ class UsulanController extends BaseController
                 return redirect()->to('/usulan')->with('error', 'Data usulan tidak ditemukan.');
             }
 
-            // Ambil ID sekolah tujuan dari inputan
-            $sekolahTujuanId = $this->request->getPost('sekolah_tujuan');
-
-            // Ambil nama sekolah berdasarkan ID
-            $sekolahModel = new \App\Models\SekolahModel();
-            $sekolahTujuan = $sekolahModel->where('id', $sekolahTujuanId)->first();
-
-            if (!$sekolahTujuan) {
-                return redirect()->to('/usulan/edit-usulan/' . $id)->with('error', 'Sekolah tujuan tidak ditemukan.');
+            // Ambil nama sekolah tujuan dari POST (prioritas ke sekolah_tujuan_nama)
+            $sekolahTujuanNama = $this->request->getPost('sekolah_tujuan_nama');
+            if (empty($sekolahTujuanNama)) {
+                $sekolahTujuanNama = $this->request->getPost('sekolah_tujuan'); // fallback
             }
 
             // Data yang akan diperbarui
             $dataUpdate = [
                 'guru_nama'      => $this->request->getPost('guru_nama'),
-                'sekolah_tujuan' => $sekolahTujuan['nama_sekolah'],
+                'email'          => $this->request->getPost('email'),
+                'no_hp'          => $this->request->getPost('no_hp'),
+                'sekolah_tujuan' => $sekolahTujuanNama,
                 'alasan'         => $this->request->getPost('alasan'),
-                'jenis_usulan'   => $this->request->getPost('jenis_usulan') // ← tambahkan ini
+                'jenis_usulan'   => $this->request->getPost('jenis_usulan')
             ];
 
             // Lakukan update data usulan
-            $this->usulanModel->update($id, $dataUpdate);
+            $result = $this->usulanModel->update($id, $dataUpdate);
+
+            if (!$result) {
+                return redirect()->to('/usulan/edit-usulan/' . $id)
+                    ->with('error', 'Gagal memperbarui data usulan.');
+            }
 
             return redirect()->to('/usulan/edit-usulan/' . $id)
                 ->with('success', 'Data usulan berhasil diperbarui.');
 
         } catch (\Exception $e) {
-            return redirect()->to('/usulan/edit-usulan/' . $id)->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->to('/usulan/edit-usulan/' . $id)
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -719,6 +754,8 @@ class UsulanController extends BaseController
                 'usulan.guru_nama AS nama_guru',
                 'usulan.guru_nip AS nip',
                 'usulan.guru_nik AS nik',
+                'usulan.email',
+                'usulan.no_hp',
                 'usulan.jenis_usulan',
                 'usulan.sekolah_asal',
                 'usulan.sekolah_tujuan',
@@ -768,6 +805,7 @@ class UsulanController extends BaseController
         echo $dompdf->output();
         exit;
     }
+    
     public function checkNipNik()
     {
         $nip   = $this->request->getGet('nip');
@@ -778,36 +816,60 @@ class UsulanController extends BaseController
             return $this->response->setJSON(['exists' => false]);
         }
 
-        // Usulan aktif terakhir (jenis apa saja)
+        // Subquery untuk mengambil pengiriman_usulan terbaru per nomor_usulan
+        $latestPengiriman = '(SELECT p1.* 
+                            FROM pengiriman_usulan p1 
+                            INNER JOIN (
+                                SELECT nomor_usulan, MAX(id) AS max_id
+                                FROM pengiriman_usulan
+                                GROUP BY nomor_usulan
+                            ) p2 ON p1.id = p2.max_id) as pu';
+
+        // 1. Usulan aktif terakhir (jenis apa saja) - kecuali yang ditolak
         $usulanAktif = $this->usulanModel
-            ->select('status, jenis_usulan')
-            ->where('guru_nip', $nip)
-            ->where('guru_nik', $nik)
-            ->whereIn('status', ['01','02','03','04','05','06'])
-            ->orderBy('created_at', 'DESC')
+            ->select('usulan.status, usulan.jenis_usulan')
+            ->join($latestPengiriman, 'pu.nomor_usulan = usulan.nomor_usulan', 'left')
+            ->where('usulan.guru_nip', $nip)
+            ->where('usulan.guru_nik', $nik)
+            ->whereIn('usulan.status', ['01', '02', '03', '04', '05', '06'])
+            ->groupStart()
+                ->where('pu.status_telaah IS NULL')
+                ->orWhere('pu.status_telaah !=', 'Ditolak')
+            ->groupEnd()
+            ->orderBy('usulan.created_at', 'DESC')
             ->first();
 
-        // Usulan aktif dengan jenis yg sama
+        // 2. Usulan aktif dengan jenis yang sama
         $sameJenis = $this->usulanModel
-            ->select('status')
-            ->where('guru_nip', $nip)
-            ->where('guru_nik', $nik)
-            ->where('jenis_usulan', $jenis)
-            ->whereIn('status', ['01','02','03','04','05','06'])
-            ->orderBy('created_at', 'DESC')
+            ->select('usulan.status')
+            ->join($latestPengiriman, 'pu.nomor_usulan = usulan.nomor_usulan', 'left')
+            ->where('usulan.guru_nip', $nip)
+            ->where('usulan.guru_nik', $nik)
+            ->where('usulan.jenis_usulan', $jenis)
+            ->whereIn('usulan.status', ['01', '02', '03', '04', '05', '06'])
+            ->groupStart()
+                ->where('pu.status_telaah IS NULL')
+                ->orWhere('pu.status_telaah !=', 'Ditolak')
+            ->groupEnd()
+            ->orderBy('usulan.created_at', 'DESC')
             ->first();
 
-        // Usulan aktif dengan jenis berbeda
+        // 3. Usulan aktif dengan jenis berbeda
         $usulanLain = $this->usulanModel
-            ->select('status')
-            ->where('guru_nip', $nip)
-            ->where('guru_nik', $nik)
-            ->where('jenis_usulan !=', $jenis)
-            ->whereIn('status', ['01','02','03','04','05','06'])
-            ->orderBy('created_at', 'DESC')
+            ->select('usulan.status')
+            ->join($latestPengiriman, 'pu.nomor_usulan = usulan.nomor_usulan', 'left')
+            ->where('usulan.guru_nip', $nip)
+            ->where('usulan.guru_nik', $nik)
+            ->where('usulan.jenis_usulan !=', $jenis)
+            ->whereIn('usulan.status', ['01', '02', '03', '04', '05', '06'])
+            ->groupStart()
+                ->where('pu.status_telaah IS NULL')
+                ->orWhere('pu.status_telaah !=', 'Ditolak')
+            ->groupEnd()
+            ->orderBy('usulan.created_at', 'DESC')
             ->first();
 
-        // Sudah ada ND selesai (status 07) dari jalur ND reguler
+        // 4. Nota Dinas selesai (status 07)
         $notaDinasSelesai = $this->usulanModel
             ->where('guru_nip', $nip)
             ->where('guru_nik', $nik)
@@ -815,23 +877,40 @@ class UsulanController extends BaseController
             ->where('status', '07')
             ->countAllResults();
 
-        // 🔎 Ada ND/PND AKTIF (status 01–06) ?
+        // 5. ND/PND aktif (status 01–06) - kecuali ditolak
         $ndPndActive = $this->usulanModel
-            ->select('status')
-            ->where('guru_nip', $nip)
-            ->where('guru_nik', $nik)
-            ->whereIn('jenis_usulan', ['nota_dinas','perpanjangan_nota_dinas'])
-            ->whereIn('status', ['01','02','03','04','05','06'])
-            ->orderBy('created_at', 'DESC')
+            ->select('usulan.status')
+            ->join($latestPengiriman, 'pu.nomor_usulan = usulan.nomor_usulan', 'left')
+            ->where('usulan.guru_nip', $nip)
+            ->where('usulan.guru_nik', $nik)
+            ->whereIn('usulan.jenis_usulan', ['nota_dinas', 'perpanjangan_nota_dinas'])
+            ->whereIn('usulan.status', ['01', '02', '03', '04', '05', '06'])
+            ->groupStart()
+                ->where('pu.status_telaah IS NULL')
+                ->orWhere('pu.status_telaah !=', 'Ditolak')
+            ->groupEnd()
+            ->orderBy('usulan.created_at', 'DESC')
             ->first();
 
-        // 🔎 PERNAH ada dokumen ND (baik dari Mutasi Tetap/ND/PND) ?
+        // 6. Riwayat ND dari tabel sk_mutasi
         $hasNdDocAnywhere = (bool) $this->db->table('sk_mutasi sm')
             ->join('usulan u', 'u.nomor_usulan = sm.nomor_usulan', 'inner')
             ->where('u.guru_nip', $nip)
             ->where('u.guru_nik', $nik)
             ->whereIn('sm.jenis_mutasi', ['Nota Dinas', 'Nota Dinas Perpanjangan'])
             ->countAllResults();
+
+        // 🔥 CEK APAKAH ADA USULAN DITOLAK (status 02 dan status_telaah = 'Ditolak')
+        $usulanDitolak = $this->usulanModel
+            ->select('usulan.id')
+            ->join($latestPengiriman, 'pu.nomor_usulan = usulan.nomor_usulan', 'inner')
+            ->where('usulan.guru_nip', $nip)
+            ->where('usulan.guru_nik', $nik)
+            ->where('usulan.status', '02')
+            ->where('pu.status_telaah', 'Ditolak')
+            ->first();
+
+        $adaUsulanDitolak = $usulanDitolak ? true : false;
 
         return $this->response->setJSON([
             'exists'               => $usulanAktif ? true : false,
@@ -840,11 +919,11 @@ class UsulanController extends BaseController
             'sameJenisStatus'      => $sameJenis['status'] ?? null,
             'statusJenisLainAktif' => $usulanLain['status'] ?? null,
             'noteDone07'           => $notaDinasSelesai > 0,
-            'ndPndActiveStatus'    => $ndPndActive['status'] ?? null,   // 👈 baru
-            'hasNdDocAnywhere'     => $hasNdDocAnywhere,               // 👈 baru
+            'ndPndActiveStatus'    => $ndPndActive['status'] ?? null,
+            'hasNdDocAnywhere'     => $hasNdDocAnywhere,
+            'adaUsulanDitolak'     => $adaUsulanDitolak, // 🔥 tambahan
         ]);
     }
-
 
 
     // Fungsi untuk mendapatkan kode cabang dinas berdasarkan ID
@@ -1076,98 +1155,133 @@ class UsulanController extends BaseController
         ]);
     }
 
-public function updateRevisi($id) 
-{
-    // Cari data usulan by ID
-    $usulan = $this->usulanModel->find($id);
-    if (!$usulan) {
-        return redirect()->to('/usulan')->with('error', 'Data usulan tidak ditemukan.');
-    }
-
-    $nomorUsulan = $usulan['nomor_usulan'];
-    $jenis       = $usulan['jenis_usulan']; 
-    $driveLinks  = $this->request->getPost('google_drive_link');
-
-    if (!$driveLinks || !is_array($driveLinks)) {
-        return redirect()->back()->with('error', 'Data tautan berkas tidak valid.');
-    }
-
-    // === Konfigurasi jumlah berkas berdasarkan jenis_usulan ===
-    $activeIndexes   = range(0, 19);           // default Mutasi Tetap
-    $optionalIndexes = [6, 9, 16, 19];         // opsional untuk Mutasi Tetap
-
-    if ($jenis === 'nota_dinas') {
-        $activeIndexes   = [0,2,5,7,8,10,13,17,18,19];
-        $optionalIndexes = []; // semua wajib
-    }
-    elseif ($jenis === 'perpanjangan_nota_dinas') {
-        $activeIndexes   = [0,1,19];
-        $optionalIndexes = []; // semua wajib
-    }
-
-    // === Filter hanya index aktif dari input ===
-    $filteredLinks = [];
-    foreach ($activeIndexes as $i) {
-        $filteredLinks[$i] = isset($driveLinks[$i]) ? trim($driveLinks[$i]) : '';
-    }
-
-    // === Validasi wajib diisi (skip opsional) ===
-    foreach ($activeIndexes as $i) {
-        if (!in_array($i, $optionalIndexes) && empty($filteredLinks[$i])) {
-            return redirect()->back()->with('error', "Berkas ke-".($i+1)." wajib diisi.");
+    public function updateRevisi($id) 
+    {
+        // Cari data usulan by ID
+        $usulan = $this->usulanModel->find($id);
+        if (!$usulan) {
+            return redirect()->to('/usulan')->with('error', 'Data usulan tidak ditemukan.');
         }
-    }
 
-    $db = \Config\Database::connect();
-    $db->transBegin();
+        $nomorUsulan = $usulan['nomor_usulan'];
+        $jenis       = $usulan['jenis_usulan']; 
+        $driveLinks  = $this->request->getPost('google_drive_link');
 
-    try {
-        $usulanDriveModel = new \App\Models\UsulanDriveModel();
+        if (!$driveLinks || !is_array($driveLinks)) {
+            return redirect()->back()->with('error', 'Data tautan berkas tidak valid.');
+        }
 
-        // Ambil data lama untuk nomor_usulan ini
-        $existingLinks = $usulanDriveModel
-            ->where('nomor_usulan', $nomorUsulan)
-            ->orderBy('id', 'ASC')
-            ->findAll();
+        // === Konfigurasi jumlah berkas berdasarkan jenis_usulan ===
+        $activeIndexes   = range(0, 19);           // default Mutasi Tetap
+        $optionalIndexes = [6, 9, 16, 19];         // opsional untuk Mutasi Tetap
 
-        // Update/Insert sesuai filteredLinks
-        foreach ($filteredLinks as $index => $link) {
-            if (!empty($existingLinks[$index]['id'])) {
-                $usulanDriveModel->update($existingLinks[$index]['id'], [
-                    'drive_link' => $link,
-                    'updated_at' => date('Y-m-d H:i:s')
-                ]);
-            } else {
-                $usulanDriveModel->insert([
-                    'nomor_usulan' => $nomorUsulan,
-                    'drive_link'   => $link,
-                    'created_at'   => date('Y-m-d H:i:s')
-                ]);
+        if ($jenis === 'nota_dinas') {
+            $activeIndexes   = [0,2,5,7,8,10,13,17,18,19];
+            $optionalIndexes = []; // semua wajib
+        }
+        elseif ($jenis === 'perpanjangan_nota_dinas') {
+            $activeIndexes   = [0,1,19];
+            $optionalIndexes = []; // semua wajib
+        }
+
+        // === Filter hanya index aktif dari input ===
+        $filteredLinks = [];
+        foreach ($activeIndexes as $i) {
+            $filteredLinks[$i] = isset($driveLinks[$i]) ? trim($driveLinks[$i]) : '';
+        }
+
+        // === Validasi wajib diisi (skip opsional) ===
+        foreach ($activeIndexes as $i) {
+            if (!in_array($i, $optionalIndexes) && empty($filteredLinks[$i])) {
+                return redirect()->back()->with('error', "Berkas ke-".($i+1)." wajib diisi.");
             }
         }
 
-        // Reset status ke 01 (siap kirim ulang)
-        $this->usulanModel->update($id, ['status' => '01']);
+        $db = \Config\Database::connect();
+        $db->transBegin();
 
-        // Tambah riwayat status
-        $this->historyModel->insert([
-            'nomor_usulan'    => $nomorUsulan,
-            'status'          => '01',
-            'updated_at'      => date('Y-m-d H:i:s'),
-            'catatan_history' => 'Data usulan dilakukan revisi oleh Cabang Dinas'
-        ]);
+        try {
+            $usulanDriveModel = new \App\Models\UsulanDriveModel();
 
-        $db->transCommit();
+            // Ambil data lama untuk nomor_usulan ini
+            $existingLinks = $usulanDriveModel
+                ->where('nomor_usulan', $nomorUsulan)
+                ->orderBy('id', 'ASC')
+                ->findAll();
+
+            // Update/Insert sesuai filteredLinks
+            foreach ($filteredLinks as $index => $link) {
+                if (!empty($existingLinks[$index]['id'])) {
+                    $usulanDriveModel->update($existingLinks[$index]['id'], [
+                        'drive_link' => $link,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                } else {
+                    $usulanDriveModel->insert([
+                        'nomor_usulan' => $nomorUsulan,
+                        'drive_link'   => $link,
+                        'created_at'   => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+
+            // Reset status ke 01 (siap kirim ulang)
+            $this->usulanModel->update($id, ['status' => '01']);
+
+            // Tambah riwayat status
+            $this->historyModel->insert([
+                'nomor_usulan'    => $nomorUsulan,
+                'status'          => '01',
+                'updated_at'      => date('Y-m-d H:i:s'),
+                'catatan_history' => 'Data usulan dilakukan revisi oleh Cabang Dinas'
+            ]);
+
+            $db->transCommit();
+
+        // 🔔 KIRIM EMAIL NOTIFIKASI KE GURU
+        $usulanData = $this->usulanModel->find($id); // ambil ulang untuk memastikan data terbaru
+        if ($usulanData && !empty($usulanData['email'])) {
+            helper('phpmailer');
+            $jenisLabel = match ($usulanData['jenis_usulan']) {
+                'mutasi_tetap' => 'Mutasi',
+                'nota_dinas'   => 'Nota Dinas',
+                'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                default => $usulanData['jenis_usulan']
+            };
+
+            $pesanUtama = "Revisi usulan <strong>{$jenisLabel}</strong> Anda dengan nomor <strong>{$nomorUsulan}</strong> telah berhasil dilakukan oleh Cabang Dinas. Usulan akan kembali ke antrian untuk diproses lebih lanjut.";
+            $statusText = "01 - Data usulan dilakukan revisi oleh Cabang Dinas";
+            $link = base_url('lacak-mutasi');
+
+            $subject = "SIMUTASI 01 - Data usulan {$jenisLabel} dilakukan revisi oleh Cabang Dinas";
+            $message = getEmailTemplate(
+                $usulanData['guru_nama'],
+                $jenisLabel,
+                $nomorUsulan,
+                $pesanUtama,
+                $statusText,
+                $link
+            );
+
+            $result = send_email_phpmailer($usulanData['email'], $subject, $message);
+            if ($result) {
+                log_message('debug', 'Email revisi berhasil dikirim ke ' . $usulanData['email']);
+            } else {
+                log_message('error', 'Email revisi gagal dikirim ke ' . $usulanData['email']);
+            }
+        } else {
+            log_message('debug', 'Email tidak dikirim karena alamat email kosong atau usulan tidak ditemukan.');
+        }
 
         session()->setFlashdata('success', 'Revisi berhasil disimpan. Silakan lakukan pengiriman ulang.');
         return redirect()->to('/usulan');
 
-    } catch (\Exception $e) {
-        $db->transRollback();
-        log_message('error', 'Gagal menyimpan revisi: ' . $e->getMessage());
-        return redirect()->to('/usulan/revisi/' . $id)->with('error', 'Terjadi kesalahan saat menyimpan revisi.');
+        } catch (\Exception $e) {
+            $db->transRollback();
+            log_message('error', 'Gagal menyimpan revisi: ' . $e->getMessage());
+            return redirect()->to('/usulan/revisi/' . $id)->with('error', 'Terjadi kesalahan saat menyimpan revisi.');
+        }
     }
-}
 
 
 

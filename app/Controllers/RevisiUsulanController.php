@@ -116,6 +116,30 @@ class RevisiUsulanController extends BaseController
                 throw new \Exception('Transaksi database gagal.');
             }
 
+            // 🔔 Kirim email notifikasi bahwa revisi telah diterima
+            $usulan = $this->usulanModel->where('nomor_usulan', $nomorUsulan)->first();
+            if ($usulan && !empty($usulan['email'])) {
+                helper('phpmailer');
+                $jenisLabel = match ($usulan['jenis_usulan']) {
+                    'mutasi_tetap' => 'Mutasi',
+                    'nota_dinas'   => 'Nota Dinas',
+                    'perpanjangan_nota_dinas' => 'Perpanjangan Nota Dinas',
+                    default => $usulan['jenis_usulan']
+                };
+                $subject = "SIMUTASI 01 - Usulan {$jenisLabel} Anda telah dilakukan revisi oleh Cabang Dinas";
+                $message = "<h3>Assalamu'alaikum " . htmlspecialchars($usulan['guru_nama']) . ",</h3>";
+                $message .= "<p>Revisi usulan {$jenisLabel} Anda dengan nomor <strong>{$nomorUsulan}</strong> telah berhasil dilakukan oleh Cabang Dinas.</p>";
+                $message .= "<p>Usulan akan kembali ke antrian untuk diproses lebih lanjut.</p>";
+                $message .= "<p>Silakan pantau melalui halaman lacak: " . base_url('lacak-mutasi') . "</p>";
+                
+                $result = send_email_phpmailer($usulan['email'], $subject, $message);
+                if ($result) {
+                    log_message('debug', 'Email revisi berhasil dikirim ke ' . $usulan['email']);
+                } else {
+                    log_message('error', 'Email revisi gagal dikirim ke ' . $usulan['email']);
+                }
+            }
+
             return redirect()->to('/usulan')->with('success', 'Revisi usulan berhasil disimpan.');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -126,6 +150,7 @@ class RevisiUsulanController extends BaseController
     /**
      * Awal proses revisi (hapus pengiriman + file, reset status ke 01)
      */
+
 public function startRevisi($nomorUsulan)
 {
     if (!$nomorUsulan) {

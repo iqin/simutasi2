@@ -36,17 +36,17 @@
         </ul>
         <div class="card-body">
             <form action="/usulan/store-data-guru" method="post">
-            <div class="row">
+                <!-- Baris pertama: kolom kiri dan kanan -->
+                <div class="row">
                     <!-- Kolom Kiri (1/3) -->
                     <div class="col-md-4">
                         <div class="form-group mb-3">
-                        <label for="jenis_usulan">Jenis Usulan</label>
-                        <select name="jenis_usulan" id="jenis_usulan" class="form-control" required>
-                            <option value="mutasi_tetap" <?= old('jenis_usulan') === 'mutasi_tetap' ? 'selected' : '' ?>>Mutasi</option>
-                            <option value="nota_dinas" <?= old('jenis_usulan') === 'nota_dinas' ? 'selected' : '' ?>>Nota Dinas</option>
-							<option value="perpanjangan_nota_dinas" <?= old('jenis_usulan') === 'perpanjangan_nota_dinas' ? 'selected' : '' ?>>Perpanjangan Nota Dinas</option>                       
-							</select>
-
+                            <label for="jenis_usulan">Jenis Usulan</label>
+                            <select name="jenis_usulan" id="jenis_usulan" class="form-control" required>
+                                <option value="mutasi_tetap" <?= old('jenis_usulan') === 'mutasi_tetap' ? 'selected' : '' ?>>Mutasi</option>
+                                <option value="nota_dinas" <?= old('jenis_usulan') === 'nota_dinas' ? 'selected' : '' ?>>Nota Dinas</option>
+                                <option value="perpanjangan_nota_dinas" <?= old('jenis_usulan') === 'perpanjangan_nota_dinas' ? 'selected' : '' ?>>Perpanjangan Nota Dinas</option>
+                            </select>
                         </div>
                         <div class="form-group mb-3">
                             <label for="guruNama">Nama GTK</label>
@@ -61,6 +61,14 @@
                             <label for="guruNik">NIK</label>
                             <input type="text" name="guru_nik" id="guruNik" class="form-control" maxlength="16" pattern="\d{16}" title="Masukkan tepat 16 digit angka" required>
                         </div>
+                        <div class="form-group mb-3">
+                            <label for="email">Email Aktif GTK <span class="badge bg-danger text-white">New</span></label>
+                            <input type="email" name="email" id="email" class="form-control" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="email">Email Aktif GTK <span class="badge bg-danger text-white">New</span></label>
+                            <input type="text" name="no_hp" id="no_hp" class="form-control" placeholder="08xxxxxxxxxx" required>
+                        </div>
                     </div>
 
                     <!-- Kolom Tengah (2/3) -->
@@ -73,7 +81,6 @@
                                     <select id="kabupatenAsal" name="kabupaten_asal_id" class="form-control" required>
                                         <option value="">-- Pilih Kabupaten --</option>
                                         <?php 
-                                            // Jika role = operator, hanya tampilkan kabupaten terkait Cabang Dinas
                                             if (session()->get('role') === 'operator') {
                                                 foreach ($kabupatenListAsal as $kabupaten): ?>
                                                     <option value="<?= $kabupaten['id_kab']; ?>" <?= ($kabupaten['id_kab'] == $kabupaten_asal_id) ? 'selected' : '' ?>>
@@ -81,14 +88,13 @@
                                                     </option>
                                                 <?php endforeach;
                                             } else {
-                                                // Jika role = admin atau kabid, tampilkan semua kabupaten
                                                 foreach ($kabupatenListTujuan as $kabupaten): ?>
                                                     <option value="<?= $kabupaten['id_kab']; ?>" <?= ($kabupaten['id_kab'] == $kabupaten_asal_id) ? 'selected' : '' ?>>
                                                         <?= $kabupaten['nama_kab']; ?>
                                                     </option>
                                                 <?php endforeach;
                                             }
-                                            ?>                                                
+                                        ?>                                                
                                     </select>
                                 </div>
                             </div>
@@ -103,7 +109,7 @@
                         </div>
 
                         <?php 
-                        $sekolahAsalList = isset($sekolahAsalList) ? $sekolahAsalList : []; // Hindari error jika variabel belum terisi
+                        $sekolahAsalList = isset($sekolahAsalList) ? $sekolahAsalList : []; 
                         ?>
                         <!-- Sekolah Asal -->
                         <div class="form-group mb-3">
@@ -120,15 +126,15 @@
                         <div class="row">
                             <!-- Kabupaten Tujuan & Cabang Dinas Tujuan sejajar -->
                             <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="kabupatenTujuan">Kabupaten Tujuan</label>
-                                <select id="kabupatenTujuan" name="kabupaten_tujuan_id" class="form-control" required>
-                                    <option value="">-- Pilih Kabupaten --</option>
-                                    <?php foreach ($kabupatenListTujuan as $kabupaten): ?>
-                                        <option value="<?= $kabupaten['id_kab']; ?>"><?= $kabupaten['nama_kab']; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                                <div class="form-group mb-3">
+                                    <label for="kabupatenTujuan">Kabupaten Tujuan</label>
+                                    <select id="kabupatenTujuan" name="kabupaten_tujuan_id" class="form-control" required>
+                                        <option value="">-- Pilih Kabupaten --</option>
+                                        <?php foreach ($kabupatenListTujuan as $kabupaten): ?>
+                                            <option value="<?= $kabupaten['id_kab']; ?>"><?= $kabupaten['nama_kab']; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
@@ -147,14 +153,19 @@
                             </select>
                             <input type="hidden" name="sekolah_tujuan_nama" id="sekolahTujuanNama">
                         </div>
+                        
+                        <!-- Alasan Mutasi -->
+                        <div class="form-group mb-3">
+                            <label for="alasan">Alasan Mutasi</label>
+                            <textarea name="alasan" id="alasan" class="form-control" rows="4" placeholder="Tulis alasan mutasi secara singkat dan jelas" required></textarea>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group mb-2">
-                    <label for="alasan">Alasan Mutasi</label>
-                    <textarea name="alasan" id="alasan" class="form-control" rows="3" placeholder="Tulis alasan mutasi secara singkat dan jelas" required></textarea>
-                </div>
+                </div> <!-- Penutup row pertama -->
+
+
+                <!-- Tombol -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="/usulan" class="btn btn-sm-custom  btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+                    <a href="/usulan" class="btn btn-sm-custom btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
                     <button type="submit" class="btn btn-sm-custom btn-primary"><i class="fas fa-save"></i> Simpan & Lanjut</button>
                 </div>
             </form>
@@ -282,10 +293,22 @@ function checkNipNikAvailability() {
     .then(data => {
       submitBtn.disabled = true; // default: kunci, buka bila lolos
 
+      // 🔥 CEK APAKAH ADA USULAN DITOLAK
+    if (data.adaUsulanDitolak) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Usulan Sebelumnya Ditolak',
+            html: `Terdapat usulan dengan NIP/NIK ini yang dinyatakan <span style="color:red; font-weight:bold;">DI TOLAK</span> oleh Kabid. GTK selama proses telaah usulan<br><br>
+                Silakan <b>hapus usulan sebelumnya</b> terlebih dahulu sebelum mengajukan usulan baru.`,
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
       const sameJenisStatus   = data.sameJenisStatus;
       const statusJenisLain   = data.statusJenisLainAktif;
-      const ndPndActiveStatus = data.ndPndActiveStatus;   // 👈 baru
-      const hasNdDocAnywhere  = data.hasNdDocAnywhere;    // 👈 baru
+      const ndPndActiveStatus = data.ndPndActiveStatus;
+      const hasNdDocAnywhere  = data.hasNdDocAnywhere;
 
       const jenisText         = jenisLabels[jenis] || 'Jenis tidak diketahui';
       const statusSameText    = statusLabels[(sameJenisStatus||'')?.toString().padStart(2,'0')] || '';
@@ -333,7 +356,6 @@ function checkNipNikAvailability() {
 
       // C) Aturan KHUSUS berdasarkan pilihan jenis
       if (jenis === 'nota_dinas') {
-        // ❌ ND tidak boleh jika ada ND/PND aktif ATAU sudah pernah ada dokumen ND
         if (ndPndActiveStatus !== null && ndPndActiveStatus !== undefined) {
           Swal.fire({
             icon:'warning',
@@ -355,7 +377,6 @@ function checkNipNikAvailability() {
       }
 
       if (jenis === 'perpanjangan_nota_dinas') {
-        // ✅ PND diperbolehkan selama tidak ada ND/PND aktif saat ini
         if (ndPndActiveStatus !== null && ndPndActiveStatus !== undefined) {
           Swal.fire({
             icon:'info',

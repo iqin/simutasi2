@@ -20,98 +20,108 @@ class FilterCabdinUsulanModel extends Model
     ];
 
     /**
-     * Mendapatkan usulan berdasarkan status dan cabang dinas.
+     * Mendapatkan usulan berdasarkan status dan cabang dinas dengan pagination.
      *
      * @param string $status
      * @param string|null $cabangDinasId
+     * @param int $perPage
+     * @param string $search
      * @return array
      */
-    public function getUsulanByStatus($status, $cabangDinasId = null, $limit = 10, $offset = 0)
+    public function getUsulanByStatus($status, $cabangDinasId = null, $perPage = 10, $search = '')
     {
         $query = $this->where('status', $status);
 
-        if ($cabangDinasId) {
-            $query->where('cabang_dinas_id', $cabangDinasId); // Filter berdasarkan cabang dinas
-        }
-
-        return $query->orderBy('created_at', 'DESC')->findAll($limit, $offset);
-    }
-    
-    /* Kode ini diubah karena ada bug duplikasi data walaupun databsenya normal
-
-      public function getUsulanWithDokumenPaginated($status, $cabangDinasId = null, $perPage = 10)
-      {
-          $query = $this->select('usulan.*, pengiriman_usulan.dokumen_rekomendasi, pengiriman_usulan.status_usulan_cabdin, pengiriman_usulan.catatan')
-              ->join('pengiriman_usulan', 'pengiriman_usulan.nomor_usulan = usulan.nomor_usulan', 'left')
-              ->where('usulan.status', $status);
-
-          if ($cabangDinasId) {
-              $query->where('usulan.cabang_dinas_id', $cabangDinasId);
-          }
-
-          return $query->paginate($perPage, 'page_status02'); // Menggunakan pagination bawaan CI4
-      }
-  Berikut kode penggantinya:
-  */
-    public function getUsulanWithDokumenPaginated($status, $cabangDinasId = null, $perPage = 10)
-    {
-      $query = $this->select(
-        'usulan.*,
-                     pu.dokumen_rekomendasi,
-                     pu.status_usulan_cabdin,
-                     pu.catatan'
-      )
-        ->join(
-        '(SELECT p1.*
-                      FROM pengiriman_usulan p1
-                      INNER JOIN (
-                          SELECT nomor_usulan, MAX(id) AS max_id
-                          FROM pengiriman_usulan
-                          GROUP BY nomor_usulan
-                      ) p2 ON p1.id = p2.max_id
-                    ) pu',
-        'pu.nomor_usulan = usulan.nomor_usulan',
-        'left'
-      )
-        ->where('usulan.status', $status);
-
-      if ($cabangDinasId) {
-        $query->where('usulan.cabang_dinas_id', $cabangDinasId);
-      }
-
-      return $query->paginate($perPage, 'page_status02');
-    }
-
-
-    public function countUsulanByStatus($status, $cabangDinasId = null)
-    {
-        $query = $this->where('status', $status);
-
-        if ($cabangDinasId) {
+        if (!empty($cabangDinasId)) {
             $query->where('cabang_dinas_id', $cabangDinasId);
         }
 
-        return $query->countAllResults();
+        if (!empty($search)) {
+            $query->like('guru_nama', $search);
+        }
+
+        return $query->orderBy('created_at', 'DESC')->paginate($perPage, 'page_status01');
     }
 
-  /*Kode ini juga diubah karena sempat bug double usulan walaupun di databse normal
-  
-    public function countUsulanWithDokumen($status, $cabangDinasId = null)
+    /**
+     * Mendapatkan usulan dengan dokumen pengiriman terbaru (status tertentu) dengan pagination.
+     *
+     * @param string $status
+     * @param string|null $cabangDinasId
+     * @param int $perPage
+     * @param string $search
+     * @return array
+     */
+    public function getUsulanWithDokumenPaginated($status, $cabangDinasId = null, $perPage = 10, $search = '', $statusCabdin = '')
     {
-        $query = $this->db->table($this->table)
-            ->join('pengiriman_usulan', 'pengiriman_usulan.nomor_usulan = usulan.nomor_usulan', 'left')
+        $query = $this->select(
+                'usulan.*,
+                pu.dokumen_rekomendasi,
+                pu.status_usulan_cabdin,
+                pu.catatan'
+            )
+            ->join(
+                '(SELECT p1.*
+                FROM pengiriman_usulan p1
+                INNER JOIN (
+                    SELECT nomor_usulan, MAX(id) AS max_id
+                    FROM pengiriman_usulan
+                    GROUP BY nomor_usulan
+                ) p2 ON p1.id = p2.max_id
+                ) pu',
+                'pu.nomor_usulan = usulan.nomor_usulan',
+                'left'
+            )
             ->where('usulan.status', $status);
 
-        if ($cabangDinasId) {
+        if (!empty($cabangDinasId)) {
             $query->where('usulan.cabang_dinas_id', $cabangDinasId);
+        }
+
+        if (!empty($search)) {
+            $query->like('usulan.guru_nama', $search);
+        }
+
+        if (!empty($statusCabdin)) {
+            $query->where('pu.status_usulan_cabdin', $statusCabdin);
+        }
+
+        return $query->orderBy('usulan.created_at', 'DESC')->paginate($perPage, 'page_status02');
+    }
+
+
+    /**
+     * Menghitung jumlah usulan berdasarkan status dan cabang dinas (dengan filter pencarian).
+     *
+     * @param string $status
+     * @param string|null $cabangDinasId
+     * @param string $search
+     * @return int
+     */
+    public function countUsulanByStatus($status, $cabangDinasId = null, $search = '')
+    {
+        $query = $this->where('status', $status);
+
+        if (!empty($cabangDinasId)) {
+            $query->where('cabang_dinas_id', $cabangDinasId);
+        }
+
+        if (!empty($search)) {
+            $query->like('guru_nama', $search);
         }
 
         return $query->countAllResults();
     }
-    
-    Berikut kode penggantinya:
-    */
-  	public function countUsulanWithDokumen($status, $cabangDinasId = null)
+
+    /**
+     * Menghitung jumlah usulan dengan dokumen pengiriman (status tertentu) dengan filter pencarian.
+     *
+     * @param string $status
+     * @param string|null $cabangDinasId
+     * @param string $search
+     * @return int
+     */
+    public function countUsulanWithDokumen($status, $cabangDinasId = null, $search = '')
     {
         $query = $this->db->table('usulan')
             ->join(
@@ -124,12 +134,14 @@ class FilterCabdinUsulanModel extends Model
             )
             ->where('usulan.status', $status);
 
-        if ($cabangDinasId) {
+        if (!empty($cabangDinasId)) {
             $query->where('usulan.cabang_dinas_id', $cabangDinasId);
+        }
+
+        if (!empty($search)) {
+            $query->like('usulan.guru_nama', $search);
         }
 
         return $query->countAllResults();
     }
-
-    
 }

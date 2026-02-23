@@ -13,6 +13,8 @@ class UsulanModel extends Model
         'guru_nama',
         'guru_nip',
         'guru_nik',
+        'email',
+        'no_hp', 
         'sekolah_asal',
         'sekolah_tujuan',
         'status',
