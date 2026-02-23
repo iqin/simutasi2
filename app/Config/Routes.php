@@ -276,7 +276,7 @@ $routes->group('kelola_info', ['filter' => 'auth'], function ($routes) {
 
 $routes->get('/helpdesk', 'HelpdeskController::index', ['filter' => 'auth']);
 
-
+$routes->get('test-email', 'TestEmail::index');
 
 
 // Catch-all untuk halaman yang tidak ditemukan (opsional)
