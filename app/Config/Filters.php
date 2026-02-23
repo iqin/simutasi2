@@ -36,6 +36,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'auth'          => \App\Filters\AuthFilter::class, // Tambahkan filter custom di sini
         'securityheaders' => \App\Filters\SecurityHeadersFilter::class, 	// 🛡️ Tambahan filter keamanan custom
+        'maintenance' => \App\Filters\Maintenance::class,
     ];
 
     /**
@@ -74,6 +75,7 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
+            'maintenance',
         ],
         'after' => [
             // 'honeypot',
