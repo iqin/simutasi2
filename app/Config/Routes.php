@@ -242,6 +242,11 @@ $routes->get('/auth/authenticate', function() {
 
 $routes->get('/lacak-mutasi', 'LacakUsulanController::index');
 $routes->post('/lacak-mutasi/search', 'LacakUsulanController::search');
+
+$routes->post('/lacak-mutasi/update-kontak', 'LacakUsulanController::updateKontak');
+
+$routes->get('/lacak-mutasi/hasil/(:any)/(:any)', 'LacakUsulanController::hasil/$1/$2');
+
 // 🔹 Rute untuk mengunduh SK Mutasi / Nota Dinas (Status 07)
 $routes->get('/lacak-mutasi/download/sk/(:any)/(:any)', 'LacakUsulanController::downloadSK/$1/$2');
 
