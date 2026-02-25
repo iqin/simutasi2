@@ -11,6 +11,8 @@
     <link href="<?= base_url('assets/css/sb-admin-2.css'); ?>" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/css/simutasi-style.css'); ?>"> <!-- Pastikan CSS overlay tetap ada -->
 
+    <link rel="stylesheet" href="<?= base_url('assets/css/loading-fullscreen.css') ?>">
+
 </head>
 
 <body id="page-top" class="d-flex flex-column min-vh-100">
@@ -72,14 +74,35 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= base_url('assets/js/simutasi-overlay.js'); ?>"></script>
 
-        <!-- Load Summernote hanya jika dibutuhkan -->
-        <?= $this->renderSection('scripts'); ?>
+    <script src="<?= base_url('assets/js/loading-fullscreen.js') ?>"></script>
+    <!-- Fullscreen Loading Overlay HTML -->
+    <div id="fullscreenLoading">
+        <div class="loading-container">
+            <div class="loading-spinner">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="loading-title" id="loadingTitle">SIMUTASI</div>
+            <div class="loading-message" id="loadingMessage">Sedang Memproses Data</div>
+            <div class="loading-submessage" id="loadingSubMessage">Harap tunggu, sistem sedang bekerja...</div>
+            <div class="loading-progress">
+                <div class="loading-progress-bar"></div>
+            </div>
+            <div class="loading-warning">
+                <i class="fas fa-exclamation-circle"></i>
+                Jangan refresh atau tutup halaman
+            </div>
+        </div>
+    </div>
 
         <!-- Debugging: Cek versi jQuery -->
-        <script>
-            console.log("jQuery version:", $.fn.jquery);
-        </script>
-
+    <script>
+        console.log("jQuery version:", $.fn.jquery);
+    </script>
+    
+    <!-- Load Summernote hanya jika dibutuhkan -->
+    <?= $this->renderSection('scripts'); ?>
 </body>
 
 </html>
