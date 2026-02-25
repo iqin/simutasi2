@@ -574,6 +574,21 @@ function telaahDokumen(status) {
 }
 
 function kirimHasilTelaah(nomorUsulan, status, catatan) {
+    // ===== TAMPILKAN LOADING OVERLAY =====
+    const overlay = document.getElementById('fullscreenLoading');
+    if (overlay) {
+        const titleEl = document.getElementById('loadingTitle');
+        const msgEl = document.getElementById('loadingMessage');
+        const subMsgEl = document.getElementById('loadingSubMessage');
+        
+        if (titleEl) titleEl.textContent = 'MELAKUKAN TELAAH';
+        if (msgEl) msgEl.textContent = status === 'Disetujui' ? 'Menyetujui usulan' : 'Menolak usulan';
+        if (subMsgEl) subMsgEl.textContent = 'Sedang memproses data telaah...';
+        
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
     const data = {
         nomor_usulan: nomorUsulan,
         status_telaah: status,
@@ -588,37 +603,48 @@ function kirimHasilTelaah(nomorUsulan, status, catatan) {
         },
         body: JSON.stringify(data),
     })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Gagal menghubungi server.');
+    .then(async (response) => {
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Gagal menghubungi server.');
+        }
+        return response.json();
+    })
+    .then((data) => {
+        if (data.message) {
+            // Sembunyikan loading
+            if (overlay) {
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
             }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.message) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Proses Berhasil',
-                    text: data.message,
-                }).then(() => {
-                    location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Proses Gagal',
-                    text: data.error || 'Gagal memperbarui hasil telaah.',
-                });
-            }
-        })
-        .catch((error) => {
+            
+            // NOTIFIKASI SUKSES LAMA (HANYA PESAN)
             Swal.fire({
-                icon: 'error',
-                title: 'Terjadi Kesalahan',
-                text: error.message,
+                icon: 'success',
+                title: 'Proses Berhasil',
+                text: data.message,
+            }).then(() => {
+                location.reload();
             });
+        } else {
+            throw new Error(data.error || 'Gagal memperbarui hasil telaah.');
+        }
+    })
+    .catch((error) => {
+        // Sembunyikan loading jika error
+        if (overlay) {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi Kesalahan',
+            text: error.message,
         });
+    });
 }
+
 function showDetailKanan(data) {
     // BAGIAN 1: Informasi Usulan Guru
     document.getElementById('detailNomorUsulanKanan').textContent = data.nomor_usulan || '-';

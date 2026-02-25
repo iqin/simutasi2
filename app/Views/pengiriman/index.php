@@ -625,5 +625,62 @@ function showBerkasModal(nomorUsulan) {
     });
 </script>
 
+<script>
+// ===== LOADING OVERLAY SEDERHANA UNTUK FORM PENGIRIMAN =====
+document.addEventListener('DOMContentLoaded', function() {
+    const formKirim = document.querySelector('form[action="/pengiriman/updateStatus"]');
+    const overlay = document.getElementById('fullscreenLoading');
+    
+    if (!formKirim) {
+        console.error('Form tidak ditemukan!');
+        return;
+    }
+    
+    if (!overlay) {
+        console.error('Overlay tidak ditemukan!');
+        return;
+    }
+    
+    console.log('✅ Form dan overlay siap');
+    
+    formKirim.addEventListener('submit', function(e) {
+        console.log('📤 Form di-submit!');
+        
+        // Cegah double submit
+        if (formKirim.dataset.submitting === 'true') {
+            console.log('⛔ Double submit dicegah');
+            e.preventDefault();
+            return;
+        }
+        
+        formKirim.dataset.submitting = 'true';
+        console.log('🔒 Form dikunci');
+        
+        // Nonaktifkan tombol
+        const submitBtn = formKirim.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+        }
+        
+        // TAMPILKAN OVERLAY - PASTI INI YANG KERJA
+        console.log('🎯 Menampilkan overlay...');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Update pesan (opsional)
+        const titleEl = document.getElementById('loadingTitle');
+        const msgEl = document.getElementById('loadingMessage');
+        const subMsgEl = document.getElementById('loadingSubMessage');
+        
+        if (titleEl) titleEl.textContent = 'MENGIRIM USULAN';
+        if (msgEl) msgEl.textContent = 'Mengirim usulan ke Dinas Provinsi';
+        if (subMsgEl) subMsgEl.textContent = 'Sedang memproses dokumen...';
+        
+        // Form akan tetap di-submit secara normal
+        // Setelah redirect/reload, overlay akan hilang dengan sendirinya
+    });
+});
+</script>
 
 <?= $this->endSection(); ?>

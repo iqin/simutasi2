@@ -207,7 +207,7 @@
 </div>
 
 <script>
-        function showDetailUsulan(data) {
+    function showDetailUsulan(data) {
         document.getElementById("detailNomorUsulan").innerText = data.nomor_usulan;
         document.getElementById("detailNamaGuru").innerText = data.guru_nama;
         document.getElementById("detailNIP").innerText = data.guru_nip || "-";
@@ -284,38 +284,65 @@
     });
 
     function confirmHapusRekom() {
-    let nomorUsulan = document.getElementById("detailNomorUsulan").textContent.trim(); // Ambil nomor usulan
+        let nomorUsulan = document.getElementById("detailNomorUsulan").textContent.trim();
 
-    Swal.fire({
-        title: 'Batalkan Rekom Kadis?',
-        text: "Surat rekomendasi ini akan dihapus dan status usulan akan dikembalikan ke 04!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, Hapus',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('/rekomkadis/hapus/' + encodeURIComponent(nomorUsulan), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('Berhasil!', 'Rekomendasi berhasil dihapus.', 'success')
-                        .then(() => location.reload());
-                } else {
-                    Swal.fire('Gagal!', data.message || 'Terjadi kesalahan!', 'error');
+        Swal.fire({
+            title: 'Batalkan Rekom Kadis?',
+            text: "Surat rekomendasi ini akan dihapus dan status usulan akan dikembalikan ke 04!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tampilkan loading overlay
+                const overlay = document.getElementById('fullscreenLoading');
+                if (overlay) {
+                    const titleEl = document.getElementById('loadingTitle');
+                    const msgEl = document.getElementById('loadingMessage');
+                    const subMsgEl = document.getElementById('loadingSubMessage');
+                    
+                    if (titleEl) titleEl.textContent = 'MENGHAPUS REKOMENDASI';
+                    if (msgEl) msgEl.textContent = 'Membatalkan rekomendasi Kepala Dinas';
+                    if (subMsgEl) subMsgEl.textContent = 'Sedang memproses...';
+                    
+                    overlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
                 }
-            })
-            .catch(error => {
-                Swal.fire('Gagal!', 'Terjadi kesalahan jaringan atau server.', 'error');
-            });
-        }
-    });
-}
+
+                fetch('/rekomkadis/hapus/' + encodeURIComponent(nomorUsulan), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Sembunyikan loading
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                    
+                    if (data.success) {
+                        // NOTIFIKASI SUKSES LAMA
+                        Swal.fire('Berhasil!', 'Rekomendasi berhasil dihapus.', 'success')
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire('Gagal!', data.message || 'Terjadi kesalahan!', 'error');
+                    }
+                })
+                .catch(error => {
+                    // Sembunyikan loading jika error
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                    Swal.fire('Gagal!', 'Terjadi kesalahan jaringan atau server.', 'error');
+                });
+            }
+        });
+    }
 
 // Debounce function
 function debounce(func, wait) {
@@ -348,6 +375,52 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+</script>
+
+<script>
+// ===== LOADING OVERLAY UNTUK FORM UPLOAD REKOMENDASI =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Tangani semua form upload rekomendasi dengan action yang mengandung 'rekomkadis/upload'
+    document.querySelectorAll('form[action*="rekomkadis/upload"]').forEach(form => {
+        console.log('Form upload ditemukan:', form);
+        
+        form.addEventListener('submit', function(e) {
+            // Cegah double submit
+            if (form.dataset.submitting === 'true') {
+                e.preventDefault();
+                return;
+            }
+            
+            form.dataset.submitting = 'true';
+            console.log('Form upload rekomendasi di-submit');
+            
+            // Nonaktifkan tombol submit
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            }
+            
+            // Tampilkan loading overlay
+            const overlay = document.getElementById('fullscreenLoading');
+            if (overlay) {
+                const titleEl = document.getElementById('loadingTitle');
+                const msgEl = document.getElementById('loadingMessage');
+                const subMsgEl = document.getElementById('loadingSubMessage');
+                
+                if (titleEl) titleEl.textContent = 'MENGUNGGAH REKOMENDASI';
+                if (msgEl) msgEl.textContent = 'Menyimpan rekomendasi Kepala Dinas';
+                if (subMsgEl) subMsgEl.textContent = 'Sedang memproses file...';
+                
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Form akan tetap di-submit secara normal
+            // Setelah redirect/reload, overlay akan hilang dengan sendirinya
+        });
+    });
+});
 </script>
 
 <?= $this->endSection(); ?>

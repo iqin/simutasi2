@@ -379,13 +379,35 @@
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
+                // ===== TAMPILKAN LOADING OVERLAY =====
+                const overlay = document.getElementById('fullscreenLoading');
+                if (overlay) {
+                    const titleEl = document.getElementById('loadingTitle');
+                    const msgEl = document.getElementById('loadingMessage');
+                    const subMsgEl = document.getElementById('loadingSubMessage');
+                    
+                    if (titleEl) titleEl.textContent = 'MENGHAPUS DOKUMEN';
+                    if (msgEl) msgEl.textContent = 'Menghapus dokumen dari server';
+                    if (subMsgEl) subMsgEl.textContent = 'Sedang memproses...';
+                    
+                    overlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+
                 fetch('/skmutasi/delete/' + encodeURIComponent(idSk), {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 })
                 .then(r => r.json())
                 .then(res => {
+                    // Sembunyikan loading
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                    
                     if (res.success) {
+                        // NOTIFIKASI SUKSES TETAP SAMA
                         Swal.fire('Berhasil!', res.message || 'Dokumen dihapus.', 'success')
                             .then(() => location.reload());
                     } else {
@@ -393,6 +415,11 @@
                     }
                 })
                 .catch(() => {
+                    // Sembunyikan loading jika error
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
                     Swal.fire('Gagal!', 'Terjadi kesalahan jaringan/server.', 'error');
                 });
             }
@@ -564,6 +591,52 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+</script>
+
+<script>
+// ===== LOADING OVERLAY UNTUK FORM UPLOAD SK/ND =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Tangani semua form upload SK/ND
+    document.querySelectorAll('form[action*="skmutasi/upload"]').forEach(form => {
+        console.log('Form upload SK/ND ditemukan:', form);
+        
+        form.addEventListener('submit', function(e) {
+            // Cegah double submit
+            if (form.dataset.submitting === 'true') {
+                e.preventDefault();
+                return;
+            }
+            
+            form.dataset.submitting = 'true';
+            console.log('Form upload SK/ND di-submit');
+            
+            // Nonaktifkan tombol submit
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            }
+            
+            // Tampilkan loading overlay
+            const overlay = document.getElementById('fullscreenLoading');
+            if (overlay) {
+                const titleEl = document.getElementById('loadingTitle');
+                const msgEl = document.getElementById('loadingMessage');
+                const subMsgEl = document.getElementById('loadingSubMessage');
+                
+                if (titleEl) titleEl.textContent = 'MENGUNGGAH DOKUMEN';
+                if (msgEl) msgEl.textContent = 'Menyimpan Dokumen ke server';
+                if (subMsgEl) subMsgEl.textContent = 'Sedang memproses file...';
+                
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Form akan tetap di-submit secara normal
+            // Setelah redirect/reload, overlay akan hilang dengan sendirinya
+        });
+    });
+});
 </script>
 
 <?= $this->endSection(); ?>

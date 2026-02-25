@@ -361,7 +361,7 @@
         document.getElementById('dataAkanDikirimContainer').style.display = 'none';
     }
 
-    // Tombol Kirim
+    // ===== LOADING OVERLAY UNTUK PROSES KIRIM KE BKA =====
     function kirimDataKeBKPSDM() {
         const nomorUsulanList = Array.from(document.querySelectorAll('#tableAkanDikirim tbody tr'))
                                     .map(row => row.getAttribute('data-nomor'));
@@ -382,16 +382,37 @@
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
+                // ===== TAMPILKAN LOADING OVERLAY =====
+                const overlay = document.getElementById('fullscreenLoading');
+                if (overlay) {
+                    const titleEl = document.getElementById('loadingTitle');
+                    const msgEl = document.getElementById('loadingMessage');
+                    const subMsgEl = document.getElementById('loadingSubMessage');
+                    
+                    if (titleEl) titleEl.textContent = 'MENGIRIM KE BKA';
+                    if (msgEl) msgEl.textContent = 'Mengirim berkas ke Badan Kepegawaian Aceh';
+                    if (subMsgEl) subMsgEl.textContent = 'Memproses ' + nomorUsulanList.length + ' berkas...';
+                    
+                    overlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+
                 fetch('<?= base_url('berkasbkpsdm/kirim') ?>', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest' // **Pastikan AJAX request**
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({ nomor_usulan: nomorUsulanList })
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Sembunyikan loading overlay
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                    
                     if (data.message) {
                         let rincianHTML = `
                             <p style="text-align: center;">${data.message}</p>
@@ -402,6 +423,8 @@
                             rincianHTML += `<li>${item}</li>`;
                         });
                         rincianHTML += "</ul>";
+                        
+                        // NOTIFIKASI SUKSES TETAP SAMA
                         Swal.fire({
                             title: 'Berhasil!',
                             html: rincianHTML,
@@ -414,6 +437,11 @@
                     }
                 })
                 .catch(error => {
+                    // Sembunyikan loading jika error
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
                     console.error('Error fetch:', error);
                     Swal.fire('Error!', 'Terjadi kesalahan. Coba lagi.', 'error');
                 });
