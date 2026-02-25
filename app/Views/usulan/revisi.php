@@ -311,4 +311,84 @@ function previewLink(index) {
 }
 </script>
 
+<script>
+// ===== LOADING OVERLAY UNTUK FORM REVISI USULAN =====
+document.addEventListener('DOMContentLoaded', function() {
+    const formRevisi = document.querySelector('form[action*="updateRevisi"]');
+    
+    if (formRevisi) {
+        console.log('Form revisi ditemukan');
+        
+        formRevisi.addEventListener('submit', function(e) {
+            // Jalankan validasi terlebih dahulu
+            let allValid = true;
+            let submitBtn = document.getElementById("submitBtn");
+            
+            // Validasi manual (menggunakan fungsi yang sudah ada)
+            document.querySelectorAll(".drive-input").forEach((input) => {
+                const index = parseInt(input.id.replace("googleDriveLink",""));
+                let linkValue = input.value.trim();
+                let feedbackElement = document.getElementById(`errorMsg${index}`);
+                
+                if (optionalIndexes.includes(index) && !linkValue) {
+                    // Opsional, boleh kosong
+                    return;
+                }
+                if (!linkValue) {
+                    feedbackElement.innerHTML = "❌ Data masih kosong";
+                    feedbackElement.style.color = "red";
+                    allValid = false;
+                } else if (!googleDrivePattern.test(linkValue)) {
+                    feedbackElement.innerHTML = "❌ Tautan tidak valid!";
+                    feedbackElement.style.color = "red";
+                    allValid = false;
+                }
+            });
+            
+            // Jika tidak valid, hentikan submit
+            if (!allValid) {
+                e.preventDefault();
+                Swal.fire('Peringatan!', 'Masih ada berkas yang belum valid.', 'warning');
+                return;
+            }
+            
+            // Cegah double submit
+            if (formRevisi.dataset.submitting === 'true') {
+                e.preventDefault();
+                return;
+            }
+            
+            formRevisi.dataset.submitting = 'true';
+            console.log('Form revisi di-submit');
+            
+            // Nonaktifkan tombol submit
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            }
+            
+            // Tampilkan loading overlay
+            const overlay = document.getElementById('fullscreenLoading');
+            if (overlay) {
+                const titleEl = document.getElementById('loadingTitle');
+                const msgEl = document.getElementById('loadingMessage');
+                const subMsgEl = document.getElementById('loadingSubMessage');
+                
+                if (titleEl) titleEl.textContent = 'MENYIMPAN REVISI';
+                if (msgEl) msgEl.textContent = 'Menyimpan perubahan berkas usulan';
+                if (subMsgEl) subMsgEl.textContent = 'Sedang memproses data revisi...';
+                
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Form akan tetap di-submit secara normal
+            // Setelah redirect/reload, overlay akan hilang dengan sendirinya
+        });
+    } else {
+        console.log('Form revisi tidak ditemukan');
+    }
+});
+</script>
+
 <?= $this->endSection(); ?>
