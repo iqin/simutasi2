@@ -3,6 +3,36 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ?>
 
+<!-- NOTIFIKASI SWEETALERT SEDERHANA UNTUK DATA KONTAK TERSIMPAN -->
+<?php if (session()->getFlashdata('kontak_success')): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        title: 'Data Tersimpan!',
+        text: 'Email dan No. HP telah tersimpan ke data usulan Anda. Anda akan mendapatkan notifikasi email untuk setiap perubahan status.',
+        icon: 'success',
+        timer: 3000, // Hilang setelah 3 detik
+        timerProgressBar: true,
+        showConfirmButton: false, // Tidak ada tombol OK
+        position: 'top-end', // Pojok kanan atas
+        toast: true, // Mode toast (lebih kecil)
+        width: '400px',
+        padding: '16px'
+    });
+});
+</script>
+
+<?php 
+// Hapus flashdata setelah ditampilkan
+session()->remove('kontak_success');
+session()->remove('kontak_email');
+session()->remove('kontak_hp');
+session()->remove('kontak_nomor');
+session()->remove('kontak_nip');
+?>
+<?php endif; ?>
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -159,7 +189,7 @@ ini_set('display_errors', 1);
     </div>
 
     <!-- Chatbox Saran -->
-    <div id="chatbox-container">
+    <div id="chatbox-container" style="display: none;">
         <div id="chatbox-header">
             <span><i class="fas fa-comment-dots"></i> Kotak Saran</span>
             <button id="close-chatbox">&times;</button>
@@ -251,10 +281,7 @@ ini_set('display_errors', 1);
                 });
             });
         });
-        // Langsung tampilkan chatbox saat halaman selesai dimuat
-        window.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('chatbox-container').style.display = 'block';
-        });
+
     </script>
 </body>
 </html>

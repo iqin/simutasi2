@@ -16,32 +16,16 @@ class LacakUsulanController extends Controller
         return view('lacak_mutasi'); // Menampilkan halaman landing page baru
     }
 
+
     public function search()
     {
         $nomorUsulan = $this->request->getPost('nomor_usulan');
         $nip = $this->request->getPost('nip');
-/*
-      $recaptchaResponse = $this->request->getPost('g-recaptcha-response');
 
-        // 🔹 Verifikasi Google reCAPTCHA
-        $secretKey = '6LepasoqAAAAAP0H_15xqhh9RI3HLByT-fnXO1BX'; // Ganti dengan SECRET KEY reCAPTCHA Anda
-        $verifyURL = "https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaResponse}";
-
-        $recaptcha = json_decode(file_get_contents($verifyURL));
-
-        if (!$recaptcha->success) {
-            return redirect()->to('/lacak-mutasi')->with('error', 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.');
-        }
-*/
-        // 🔹 Model untuk mencari data usulan guru
         $usulanModel = new UsulanModel();
-        $historyModel = new UsulanStatusHistoryModel();
-        $skMutasiModel = new SkMutasiModel();
-        $rekomKadisModel = new RekomkadisModel();
-        $pengirimanUsulanModel = new PengirimanUsulanModel();
-
-        // 🔹 Ambil data usulan berdasarkan nomor usulan dan NIP
-        $usulan = $usulanModel->select('id_rekomkadis, guru_nama, guru_nip, sekolah_asal, google_drive_link, sekolah_tujuan, created_at, nomor_usulan')
+        
+        // Ambil data usulan lengkap (termasuk email dan no_hp)
+        $usulan = $usulanModel->select('id, id_rekomkadis, guru_nama, guru_nip, guru_nik, email, no_hp, sekolah_asal, google_drive_link, sekolah_tujuan, created_at, nomor_usulan, status')
                               ->where('nomor_usulan', $nomorUsulan)
                               ->where('guru_nip', $nip)
                               ->first();
@@ -49,6 +33,109 @@ class LacakUsulanController extends Controller
         if (!$usulan) {
             return redirect()->to('/lacak-mutasi')->with('error', 'Nomor usulan atau NIP tidak ditemukan!');
         }
+
+        // CEK APAKAH EMAIL DAN NO_HP SUDAH TERISI
+        $statusUsulan = $usulan['status'];
+        $emailKosong = empty($usulan['email']);
+        $noHpKosong = empty($usulan['no_hp']);
+
+        // Jika usulan status 01-06 DAN (email kosong ATAU no_hp kosong)
+        if (in_array($statusUsulan, ['01', '02', '03', '04', '05', '06']) && ($emailKosong || $noHpKosong)) {
+            // Simpan data ke session untuk digunakan di form update
+            session()->set('lacak_temp', [
+                'id_usulan' => $usulan['id'],
+                'nomor_usulan' => $usulan['nomor_usulan'],
+                'nip' => $usulan['guru_nip'],
+                'nama' => $usulan['guru_nama']
+            ]);
+            
+            // Tampilkan halaman form email/no_hp
+            return view('lacak_update_kontak', [
+                'nomorUsulan' => $usulan['nomor_usulan'],
+                'nip' => $usulan['guru_nip'],
+                'nama' => $usulan['guru_nama'],
+                'email' => $usulan['email'],
+                'no_hp' => $usulan['no_hp']
+            ]);
+        }
+
+        // Jika semua syarat terpenuhi, lanjutkan ke hasil lacak
+        return $this->tampilkanHasilLacak($usulan);
+    }
+
+    /**
+     * Method untuk menyimpan update email/no_hp
+     */
+    public function updateKontak()
+    {
+        $nomorUsulan = $this->request->getPost('nomor_usulan');
+        $nip = $this->request->getPost('nip');
+        $email = $this->request->getPost('email');
+        $no_hp = $this->request->getPost('no_hp');
+
+        // Validasi input
+        if (empty($email) || empty($no_hp)) {
+            return redirect()->back()->with('error', 'Email dan No. HP harus diisi!');
+        }
+
+        $usulanModel = new UsulanModel();
+        
+        // Cari usulan berdasarkan nomor dan nip
+        $usulan = $usulanModel->where('nomor_usulan', $nomorUsulan)
+                            ->where('guru_nip', $nip)
+                            ->first();
+
+        if (!$usulan) {
+            return redirect()->to('/lacak-mutasi')->with('error', 'Data usulan tidak ditemukan!');
+        }
+
+        // Update email dan no_hp
+        $usulanModel->update($usulan['id'], [
+            'email' => $email,
+            'no_hp' => $no_hp
+        ]);
+
+        // ✅ PERBAIKAN: Set flashdata dengan nilai yang benar
+        session()->setFlashdata('kontak_success', true);
+        session()->setFlashdata('kontak_email', $email);
+        session()->setFlashdata('kontak_hp', $no_hp);
+        session()->setFlashdata('kontak_nomor', $nomorUsulan);
+        session()->setFlashdata('kontak_nip', $nip);
+
+        // Redirect ke halaman hasil lacak
+        return redirect()->to("/lacak-mutasi/hasil/$nomorUsulan/$nip");
+    }
+
+    /**
+     * Method untuk menampilkan hasil lacak setelah update kontak
+     */
+    public function hasil($nomorUsulan, $nip)
+    {
+        $usulanModel = new UsulanModel();
+        
+        $usulan = $usulanModel->select('id, id_rekomkadis, guru_nama, guru_nip, guru_nik, email, no_hp, sekolah_asal, google_drive_link, sekolah_tujuan, created_at, nomor_usulan, status')
+                            ->where('nomor_usulan', $nomorUsulan)
+                            ->where('guru_nip', $nip)
+                            ->first();
+
+        if (!$usulan) {
+            return redirect()->to('/lacak-mutasi')->with('error', 'Data usulan tidak ditemukan!');
+        }
+
+        return $this->tampilkanHasilLacak($usulan);
+    }
+
+    /**
+     * Method untuk menampilkan hasil lacak
+     */
+    private function tampilkanHasilLacak($usulan)
+    {
+        $nomorUsulan = $usulan['nomor_usulan'];
+        
+        $historyModel = new UsulanStatusHistoryModel();
+        $skMutasiModel = new SkMutasiModel();
+        $rekomKadisModel = new RekomkadisModel();
+        $pengirimanUsulanModel = new PengirimanUsulanModel();
 
         $results = $historyModel->where('nomor_usulan', $nomorUsulan)
                                 ->orderBy('updated_at', 'DESC')
@@ -71,7 +158,7 @@ class LacakUsulanController extends Controller
 
         $googleDriveLink = !empty($usulan['google_drive_link']) ? $usulan['google_drive_link'] : null;
 
-        // 🔹 Buat token unik untuk keamanan unduhan
+        // Buat token
         $tokenSK = $fileSK ? hash_hmac('sha256', $nomorUsulan . $fileSK, 'secret_key') : null;
         if ($tokenSK) {
             session()->set("token_sk_$nomorUsulan", $tokenSK);
@@ -87,7 +174,6 @@ class LacakUsulanController extends Controller
             session()->set("token_dokumen_rekom_$nomorUsulan", $tokenDokumenRekom);
         }
 
-        // 🔹 Kirim ke tampilan hasil_lacak_mutasi.php
         return view('hasil_lacak_mutasi', [
             'pengirimanUsulan' => $pengirimanUsulan,
             'nomorUsulan'   => $usulan['nomor_usulan'],
@@ -104,7 +190,9 @@ class LacakUsulanController extends Controller
             'tokenSK'       => $tokenSK,
             'tokenRekom'    => $tokenRekom,
             'tokenDokumenRekom' => $tokenDokumenRekom,
-            'googleDriveLink' => $googleDriveLink            
+            'googleDriveLink' => $googleDriveLink,
+            'email'         => $usulan['email'],
+            'no_hp'         => $usulan['no_hp']
         ]);
     }
 
