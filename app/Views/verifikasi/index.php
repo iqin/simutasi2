@@ -438,164 +438,195 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 500));
     }
 });
-function showDetail(data) {
-    // BAGIAN 1: Informasi Usulan Guru
-    document.getElementById('detailNomorUsulan').textContent = data.nomor_usulan || '-';
-    document.getElementById('detailJenisUsulan').textContent =
-        data.jenis_usulan === 'mutasi_tetap' ? 'MUTASI' :
-        data.jenis_usulan === 'nota_dinas' ? 'NOTA DINAS' :
-        data.jenis_usulan === 'perpanjangan_nota_dinas' ? 'PERPANJANGAN ND' :
-        (data.jenis_usulan || '-');
+    function showDetail(data) {
+        // BAGIAN 1: Informasi Usulan Guru
+        document.getElementById('detailNomorUsulan').textContent = data.nomor_usulan || '-';
+        document.getElementById('detailJenisUsulan').textContent =
+            data.jenis_usulan === 'mutasi_tetap' ? 'MUTASI' :
+            data.jenis_usulan === 'nota_dinas' ? 'NOTA DINAS' :
+            data.jenis_usulan === 'perpanjangan_nota_dinas' ? 'PERPANJANGAN ND' :
+            (data.jenis_usulan || '-');
 
-    // simpan jenis_usulan asli ke hidden input
-    document.getElementById('hiddenJenisUsulanVerifikasi').value = data.jenis_usulan || 'mutasi_tetap';
+        // simpan jenis_usulan asli ke hidden input
+        document.getElementById('hiddenJenisUsulanVerifikasi').value = data.jenis_usulan || 'mutasi_tetap';
 
-        document.getElementById('detailNamaGuru').textContent = data.guru_nama || '-';
-        document.getElementById('detailNIP').textContent = data.guru_nip || '-';
-        document.getElementById('detailNIK').textContent = data.guru_nik || '-';
-        document.getElementById('detailSekolahAsal').textContent = data.sekolah_asal || '-';
-        document.getElementById('detailSekolahTujuan').textContent = data.sekolah_tujuan || '-';
-        document.getElementById('detailAlasan').textContent = data.alasan || '-';
-        document.getElementById('detailTanggalInput').textContent = data.created_at ? new Date(data.created_at).toLocaleDateString('id-ID') : '-';
-/*
-        const berkasLink = document.getElementById('berkasUsulanLink');
-        if (data.google_drive_link) {
-            berkasLink.href = data.google_drive_link;
-            berkasLink.style.display = 'inline-block';
-        } else {
-            berkasLink.style.display = 'none';
+            document.getElementById('detailNamaGuru').textContent = data.guru_nama || '-';
+            document.getElementById('detailNIP').textContent = data.guru_nip || '-';
+            document.getElementById('detailNIK').textContent = data.guru_nik || '-';
+            document.getElementById('detailSekolahAsal').textContent = data.sekolah_asal || '-';
+            document.getElementById('detailSekolahTujuan').textContent = data.sekolah_tujuan || '-';
+            document.getElementById('detailAlasan').textContent = data.alasan || '-';
+            document.getElementById('detailTanggalInput').textContent = data.created_at ? new Date(data.created_at).toLocaleDateString('id-ID') : '-';
+    /*
+            const berkasLink = document.getElementById('berkasUsulanLink');
+            if (data.google_drive_link) {
+                berkasLink.href = data.google_drive_link;
+                berkasLink.style.display = 'inline-block';
+            } else {
+                berkasLink.style.display = 'none';
+            }
+    */
+            // BAGIAN 2: Informasi Rekomendasi Cabang Dinas
+            document.getElementById('detailNamaCabang').textContent = data.nama_cabang || '-';
+            document.getElementById('detailOperator').textContent = data.operator || '-';
+            document.getElementById('detailNoHP').textContent = data.no_hp || '-';
+            document.getElementById('detailTanggalDikirim').textContent = data.tanggal_dikirim ? new Date(data.tanggal_dikirim).toLocaleDateString('id-ID') : '-';
+            //document.getElementById('detailCatatan').textContent = data.catatan || '-';
+
+            const dokumenLink = document.getElementById('dokumenRekomendasiLink');
+            if (data.dokumen_rekomendasi) {
+                dokumenLink.href = `/uploads/rekomendasi/${data.dokumen_rekomendasi}`;
+                dokumenLink.style.display = 'inline-block';
+            } else {
+                dokumenLink.style.display = 'none';
+            }
+
+            document.getElementById('detailData').style.display = 'block';
+            window.scrollTo(0, document.getElementById('detailData').offsetTop);
         }
-*/
-        // BAGIAN 2: Informasi Rekomendasi Cabang Dinas
-        document.getElementById('detailNamaCabang').textContent = data.nama_cabang || '-';
-        document.getElementById('detailOperator').textContent = data.operator || '-';
-        document.getElementById('detailNoHP').textContent = data.no_hp || '-';
-        document.getElementById('detailTanggalDikirim').textContent = data.tanggal_dikirim ? new Date(data.tanggal_dikirim).toLocaleDateString('id-ID') : '-';
-        //document.getElementById('detailCatatan').textContent = data.catatan || '-';
 
-        const dokumenLink = document.getElementById('dokumenRekomendasiLink');
-        if (data.dokumen_rekomendasi) {
-            dokumenLink.href = `/uploads/rekomendasi/${data.dokumen_rekomendasi}`;
-            dokumenLink.style.display = 'inline-block';
-        } else {
-            dokumenLink.style.display = 'none';
+        function hideDetail() {
+            document.getElementById('detailData').style.display = 'none';
         }
 
-        document.getElementById('detailData').style.display = 'block';
-        window.scrollTo(0, document.getElementById('detailData').offsetTop);
-    }
+        function verifikasi(status) {
+        const nomorUsulan = document.getElementById('detailNomorUsulan').textContent;
 
-    function hideDetail() {
-        document.getElementById('detailData').style.display = 'none';
-    }
+        if (!nomorUsulan) {
+            Swal.fire({
+                icon: 'error',
+                title: '<i class="fas fa-times-circle"></i> Nomor Usulan Tidak Ditemukan',
+                html: '<p>Pastikan detail usulan sudah ditampilkan sebelum melanjutkan.</p>',
+            });
+            return;
+        }
 
-    function verifikasi(status) {
-    const nomorUsulan = document.getElementById('detailNomorUsulan').textContent;
-
-    if (!nomorUsulan) {
-        Swal.fire({
-            icon: 'error',
-            title: '<i class="fas fa-times-circle"></i> Nomor Usulan Tidak Ditemukan',
-            html: '<p>Pastikan detail usulan sudah ditampilkan sebelum melanjutkan.</p>',
-        });
-        return;
-    }
-
-    let catatan = '';
-    if (status === 'TdkLengkap') {
-        Swal.fire({
-            title: '<i class="fas fa-info-circle text-danger"></i> <strong>Masukkan Alasan Penolakan</strong>',
-            html: '<p class="text-muted">Berikan alasan penolakan untuk dokumen ini.</p>',
-            input: 'textarea',
-            inputPlaceholder: 'Tulis alasan di sini...',
-            inputAttributes: {
-                'aria-label': 'Tulis alasan penolakan',
-            },
-            showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-paper-plane"></i> Kirim',
-            cancelButtonText: '<i class="fas fa-times"></i> Batal',
-            inputValidator: (value) => {
-                if (!value) {
-                    return 'Alasan penolakan wajib diisi!';
+        let catatan = '';
+        if (status === 'TdkLengkap') {
+            Swal.fire({
+                title: '<i class="fas fa-info-circle text-danger"></i> <strong>Masukkan Alasan Penolakan</strong>',
+                html: '<p class="text-muted">Berikan alasan penolakan untuk dokumen ini.</p>',
+                input: 'textarea',
+                inputPlaceholder: 'Tulis alasan di sini...',
+                inputAttributes: {
+                    'aria-label': 'Tulis alasan penolakan',
+                },
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-paper-plane"></i> Kirim',
+                cancelButtonText: '<i class="fas fa-times"></i> Batal',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Alasan penolakan wajib diisi!';
+                    }
+                },
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    input: 'swal2-textarea',
+                    confirmButton: 'swal-button-confirm',
+                    cancelButton: 'swal-button-cancel',
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    catatan = result.value;
+                    kirimDataVerifikasi(nomorUsulan, status, catatan);
                 }
-            },
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                input: 'swal2-textarea',
-                confirmButton: 'swal-button-confirm',
-                cancelButton: 'swal-button-cancel',
-            },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                catatan = result.value;
-                kirimDataVerifikasi(nomorUsulan, status, catatan);
-            }
-        });
-    } else if (status === 'Lengkap') {
-        Swal.fire({
-            title: '<i class="fas fa-info-circle text-success"></i> <strong>Masukkan Catatan Penerimaan</strong>',
-            html: '<p class="text-muted">Anda dapat menambahkan catatan penerimaan untuk dokumen ini (opsional).</p>',
-            input: 'textarea',
-            inputPlaceholder: 'Tulis catatan di sini...',
-            inputAttributes: {
-                'aria-label': 'Tulis catatan penerimaan',
-            },
-            showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-paper-plane"></i> Kirim',
-            cancelButtonText: '<i class="fas fa-times"></i> Batal',
-            customClass: {
-                title: 'swal-title',
-                confirmButton: 'swal-button-confirm',
-                cancelButton: 'swal-button-cancel',
-            },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                catatan = result.value || '';
-                kirimDataVerifikasi(nomorUsulan, status, catatan);
-            }
-        });
+            });
+        } else if (status === 'Lengkap') {
+            Swal.fire({
+                title: '<i class="fas fa-info-circle text-success"></i> <strong>Masukkan Catatan Penerimaan</strong>',
+                html: '<p class="text-muted">Anda dapat menambahkan catatan penerimaan untuk dokumen ini (opsional).</p>',
+                input: 'textarea',
+                inputPlaceholder: 'Tulis catatan di sini...',
+                inputAttributes: {
+                    'aria-label': 'Tulis catatan penerimaan',
+                },
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-paper-plane"></i> Kirim',
+                cancelButtonText: '<i class="fas fa-times"></i> Batal',
+                customClass: {
+                    title: 'swal-title',
+                    confirmButton: 'swal-button-confirm',
+                    cancelButton: 'swal-button-cancel',
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    catatan = result.value || '';
+                    kirimDataVerifikasi(nomorUsulan, status, catatan);
+                }
+            });
+        }
     }
-}
+    
+    function kirimDataVerifikasi(nomorUsulan, status, catatan) {
+        // ===== TAMPILKAN LOADING OVERLAY =====
+        const overlay = document.getElementById('fullscreenLoading');
+        if (overlay) {
+            const titleEl = document.getElementById('loadingTitle');
+            const msgEl = document.getElementById('loadingMessage');
+            const subMsgEl = document.getElementById('loadingSubMessage');
+            
+            if (titleEl) titleEl.textContent = 'MEMVERIFIKASI BERKAS';
+            if (msgEl) msgEl.textContent = status === 'Lengkap' ? 'Menyetujui verifikasi' : 'Menolak verifikasi';
+            if (subMsgEl) subMsgEl.textContent = 'Sedang memproses data verifikasi...';
+            
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
 
-function kirimDataVerifikasi(nomorUsulan, status, catatan) {
-    const data = {
-        nomor_usulan: nomorUsulan,
-        status: status,
-        catatan: catatan,
-    };
+        const data = {
+            nomor_usulan: nomorUsulan,
+            status: status,
+            catatan: catatan,
+        };
 
-    fetch('/verifikasi/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-        .then((response) => {
+        fetch('/verifikasi/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data),
+        })
+        .then(async (response) => {
+            const result = await response.json();
+            
             if (response.ok) {
+                // Sembunyikan loading overlay
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+                
+                // NOTIFIKASI SUKSES LAMA (SEDERHANA)
                 Swal.fire({
                     icon: 'success',
-                    title: '<i class="fas fa-check-circle"></i> Verifikasi Berhasil',
-                    html: '<p>Status verifikasi berhasil diperbarui.</p>',
+                    title: 'Verifikasi Berhasil',
+                    text: result.success || 'Status verifikasi berhasil diperbarui.',
+                    confirmButtonColor: '#3085d6'
                 }).then(() => {
                     location.reload();
                 });
             } else {
-                return response.json().then((err) => {
-                    throw new Error(err.error || 'Terjadi kesalahan.');
-                });
+                throw new Error(result.error || 'Terjadi kesalahan.');
             }
         })
         .catch((error) => {
+            // Sembunyikan loading jika error
+            if (overlay) {
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+            
             Swal.fire({
                 icon: 'error',
-                title: '<i class="fas fa-exclamation-triangle"></i> Gagal Memproses',
-                html: `<p>${error.message}</p>`,
+                title: 'Verifikasi Gagal',
+                text: error.message,
+                confirmButtonColor: '#d33'
             });
         });
-}
+    }
 
     function showDetailDiverifikasi(data) {
         // Isi data detail berdasarkan data yang dipilih
@@ -786,9 +817,19 @@ function showBerkasModal(nomorUsulan) {
     let modal = new bootstrap.Modal(document.getElementById("berkasModal"));
     modal.show();
 }
+</script>
 
-
-
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('fullscreenLoading');
+    console.log('Overlay ditemukan:', overlay);
+    
+    if (overlay) {
+        console.log('Style awal overlay:', window.getComputedStyle(overlay).display);
+    } else {
+        console.error('❌ Overlay TIDAK ditemukan di halaman ini!');
+    }
+});
 </script>
 
 <?= $this->endSection(); ?>

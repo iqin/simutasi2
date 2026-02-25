@@ -401,18 +401,64 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("guruNik").addEventListener("input", checkNipNikAvailability);
 });
 
-
-// Cegah double submit
-document.querySelector('form').addEventListener('submit', function(e) {
-    const submitBtn = this.querySelector('button[type="submit"]');
-    if (submitBtn.disabled) {
-        e.preventDefault();
-        return;
-    }
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-});
 </script>
 
+<!-- ===== LOADING OVERLAY UNTUK FORM TAMBAH USULAN ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formTambah = document.querySelector('form[action="/usulan/store-data-guru"]');
+    const overlay = document.getElementById('fullscreenLoading');
+    
+    if (!formTambah) {
+        console.error('Form tambah usulan tidak ditemukan!');
+        return;
+    }
+    
+    if (!overlay) {
+        console.error('Overlay tidak ditemukan!');
+        return;
+    }
+    
+    console.log('✅ Form tambah usulan dan overlay siap');
+    
+    formTambah.addEventListener('submit', function(e) {
+        console.log('📤 Form tambah usulan di-submit!');
+        
+        // Cegah double submit
+        if (formTambah.dataset.submitting === 'true') {
+            console.log('⛔ Double submit dicegah');
+            e.preventDefault();
+            return;
+        }
+        
+        formTambah.dataset.submitting = 'true';
+        console.log('🔒 Form dikunci');
+        
+        // Nonaktifkan tombol
+        const submitBtn = formTambah.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+        }
+        
+        // TAMPILKAN OVERLAY
+        console.log('🎯 Menampilkan overlay...');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Update pesan sesuai konteks
+        const titleEl = document.getElementById('loadingTitle');
+        const msgEl = document.getElementById('loadingMessage');
+        const subMsgEl = document.getElementById('loadingSubMessage');
+        
+        if (titleEl) titleEl.textContent = 'MENYIMPAN USULAN';
+        if (msgEl) msgEl.textContent = 'Menyimpan data usulan baru';
+        if (subMsgEl) subMsgEl.textContent = 'Sedang memproses data GTK dan instansi...';
+        
+        // Form akan tetap di-submit secara normal
+        // Setelah redirect/reload, overlay akan hilang dengan sendirinya
+    });
+});
+</script>
 
 <?= $this->endSection(); ?>
