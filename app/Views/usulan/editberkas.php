@@ -80,10 +80,10 @@
                             3=>"Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala BKA)",
                             4=>"Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Gubernur cq Sekda Aceh)",
                             5=>"Rekomendasi Kepala Sekolah Melepas Lengkap dengan Analisis",
-                            6=>"Rekomendasi Melepas dari Pengawas Sekolah (Optional)",
+                            6=>"Rekomendasi Melepas dari Pengawas Sekolah",
                             7=>"Rekomendasi Melepas dari Kepala Cabang Dinas Kab/Kota",
                             8=>"Rekomendasi Kepala Sekolah Menerima Lengkap dengan Analisis",
-                            9=>"Rekomendasi Menerima dari Pengawas Sekolah (Optional)",
+                            9=>"Rekomendasi Menerima dari Pengawas Sekolah",
                             10=>"Rekomendasi Menerima dari Kepala Cabang Dinas Kab/Kota",
                             11=>"Analisis Jabatan (Anjab) dari sekolah melepas dan sekolah menerima",
                             12=>"Surat Formasi GTK dari Sekolah Asal",
@@ -96,7 +96,7 @@
                             19=>"Surat Tugas Suami dan Foto Copy Buku Nikah (Optional)",
                             20=>"SKP 2 Tahun Terakhir"
                         ];
-                        $optionalIndexes = [6,9,16,19];
+                        $optionalIndexes = [16,19];
                     }
 
                     // Nota Dinas → 10 berkas wajib semua

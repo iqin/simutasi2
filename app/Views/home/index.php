@@ -127,11 +127,11 @@
                         <li>Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala BKA).</li>
                         <li>Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Gubernur cq Sekda Aceh).</li>
                         <li>Rekomendasi Kepala Sekolah Melepas Lengkap dengan Analisis (Jumlah jam, Siswa, Rombel, Guru Mapel Kurang atau Lebih).</li>                        
-                        <li>Rekomendasi Melepas dari Pengawas Sekolah (Optional).</li>
+                        <li>Rekomendasi Melepas dari Pengawas Sekolah.</li>
                         <li>Rekomendasi Melepas & Menerima dari Pengawas Sekolah dan Kepala Cabang Dinas.</li>
                         <li>Rekomendasi Melepas dari Kepala Cabang Dinas Kab/Kota.</li>
                         <li>Rekomendasi Kepala Sekolah Menerima Lengkap dengan Analisis (Jumlah jam, Siswa, Rombel, Guru Mapel Kurang atau Lebih).</li>
-                        <li>Rekomendasi Menerima dari Pengawas Sekolah (Optional).</li>
+                        <li>Rekomendasi Menerima dari Pengawas Sekolah.</li>
                         <li>Rekomendasi Menerima dari Kepala Cabang Dinas Kab/Kota.</li>
                         <li>Analisis Jabatan (Anjab) ditandatangani oleh Kepala Sekolah Melepas dan Mengetahui Kepala Dinas.</li>
                         <li>Surat Formasi GTK dari Sekolah Asal (Data Guru dan Tendik yang ditandatangani oleh Kepala Sekolah).</li>
