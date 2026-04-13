@@ -66,7 +66,7 @@
                             <input type="email" name="email" id="email" class="form-control" required>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="email">Email Aktif GTK <span class="badge bg-danger text-white">New</span></label>
+                            <label for="email">No. HP (WhatsApp) GTK <span class="badge bg-danger text-white">New</span></label>
                             <input type="text" name="no_hp" id="no_hp" class="form-control" placeholder="08xxxxxxxxxx" required>
                         </div>
                     </div>
