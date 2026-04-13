@@ -727,27 +727,27 @@ function showBerkasModal(nomorUsulan) {
 
             // Default (Mutasi Tetap)
             let berkasLabels = [
-                "Surat Pengantar dari Cabang Dinas Asal",
-                "Surat Pengantar dari Kepala Sekolah",
-                "Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala Dinas)",
-                "Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala BKA)",
-                "Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Gubernur cq Sekda Aceh)",
-                "Rekomendasi Kepala Sekolah Melepas Lengkap dengan Analisis",
-                "Rekomendasi Melepas dari Pengawas Sekolah (Optional)",
-                "Rekomendasi Melepas dari Kepala Cabang Dinas Kab/Kota",
-                "Rekomendasi Kepala Sekolah Menerima Lengkap dengan Analisis",
-                "Rekomendasi Menerima dari Pengawas Sekolah (Optional)",
-                "Rekomendasi Menerima dari Kepala Cabang Dinas Kab/Kota",
-                "Analisis Jabatan (Anjab) dari sekolah melepas dan sekolah menerima",
-                "Surat Formasi GTK dari Sekolah Asal",
-                "Foto Copy SK 80% dan SK Terakhir di Legalisir",
-                "Foto Copy Karpeg dilegalisir",
-                "Surat Keterangan tidak Pernah di Jatuhi Hukuman Disiplin",
-                "Surat Keterangan Bebas Temuan Inspektorat (Optional)",
-                "Surat Keterangan Bebas Tugas Belajar/Izin Belajar",
-                "Daftar Riwayat Hidup/ Riwayat Pekerjaan",
-                "Surat Tugas Suami dan Foto Copy Buku Nikah (Optional)",
-                "SKP 2 Tahun Terakhir"
+                "Surat Pengantar dari Cabang Dinas Asal",                           // 0
+                "Surat Pengantar dari Kepala Sekolah",                              // 1
+                "Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala Dinas)", // 2
+                "Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala BKA)",   // 3
+                "Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Gubernur cq Sekda Aceh)", // 4
+                "Rekomendasi Kepala Sekolah Melepas Lengkap dengan Analisis",       // 5
+                "Rekomendasi dari Pengawas Sekolah Melepas",                        // 6
+                "Rekomendasi Melepas dari Kepala Cabang Dinas Kab/Kota",            // 7
+                "Rekomendasi Kepala Sekolah Menerima Lengkap dengan Analisis",      // 8
+                "Rekomendasi dari Pengawas Sekolah Menerima",                       // 9
+                "Rekomendasi Menerima dari Kepala Cabang Dinas Kab/Kota",           // 10
+                "Analisis Jabatan (Anjab) dari sekolah melepas dan sekolah menerima", // 11
+                "Surat Formasi GTK dari Sekolah Asal",                              // 12
+                "Foto Copy SK 80% dan SK Terakhir di Legalisir",                    // 13
+                "Foto Copy Karpeg dilegalisir",                                     // 14
+                "Surat Keterangan tidak Pernah di Jatuhi Hukuman Disiplin",         // 15
+                "Surat Keterangan Bebas Temuan Inspektorat (Optional)",             // 16
+                "Surat Keterangan Bebas Tugas Belajar/Izin Belajar",                // 17
+                "Daftar Riwayat Hidup/ Riwayat Pekerjaan",                          // 18
+                "Surat Tugas Suami dan Foto Copy Buku Nikah (Optional)",            // 19
+                "SKP 2 Tahun Terakhir"   
             ];
             let activeIndexes = [...Array(21).keys()];
             let optionalIndexes = [6, 9, 16, 19];
@@ -761,15 +761,17 @@ function showBerkasModal(nomorUsulan) {
                 berkasLabels[0]  = "Surat Pengantar dari Cabdin Asal";
                 berkasLabels[2]  = "Permohonan Nota Dinas Bermaterai Ditujukan Kepada Kepala Dinas Pendidikan Aceh";
                 berkasLabels[5]  = "Rekomendasi Kepsek Melepas + Analisis Kebutuhan Guru";
+                berkasLabels[6]  = "Rekomendasi dari Pengawas Sekolah Melepas";
                 berkasLabels[7]  = "Rekomendasi Cabdin Melepas";
                 berkasLabels[8]  = "Rekomendasi Kepsek Menerima + Analisis Kebutuhan Guru";
+                berkasLabels[9]  = "Rekomendasi dari Pengawas Sekolah Menerima";
                 berkasLabels[10] = "Rekomendasi Cabdin Menerima";
                 berkasLabels[13] = "Fotokopi SK 80% dan SK Terakhir";
                 berkasLabels[17] = "Surat Keterangan Bebas Tugas Belajar dari Kepsek";
                 berkasLabels[18] = "SKP 1 Tahun Terakhir";
                 berkasLabels[19] = "Surat Izin Suami/Istri & Buku Nikah";
 
-                activeIndexes = [0,2,5,7,8,10,13,17,18,19];
+                activeIndexes = [0,2,5,6,7,8,9,10,13,17,18,19]; // 12 berkas
                 optionalIndexes = []; // ✅ semua wajib
             }
 
@@ -795,7 +797,7 @@ function showBerkasModal(nomorUsulan) {
 
                 if (!berkas.drive_link) {
                     if (!optionalIndexes.includes(index)) {
-                        button = `<span class="badge bg-danger">Kosong</span>`;
+                        
                     }
                 } else {
                     button = `<a href="${driveLink}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Lihat</a>`;
