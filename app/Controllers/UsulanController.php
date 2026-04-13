@@ -1176,7 +1176,7 @@ class UsulanController extends BaseController
         $optionalIndexes = [6, 9, 16, 19];         // opsional untuk Mutasi Tetap
 
         if ($jenis === 'nota_dinas') {
-            $activeIndexes   = [0,2,5,7,8,10,13,17,18,19];
+            $activeIndexes   = [0,2,5,6,7,8,9,10,13,17,18,19]; // ✅ tambahkan 6 dan 9
             $optionalIndexes = []; // semua wajib
         }
         elseif ($jenis === 'perpanjangan_nota_dinas') {
