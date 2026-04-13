@@ -80,10 +80,10 @@
                             3=>"Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala BKA)",
                             4=>"Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Gubernur cq Sekda Aceh)",
                             5=>"Rekomendasi Kepala Sekolah Melepas Lengkap dengan Analisis",
-                            6=>"Rekomendasi Melepas dari Pengawas Sekolah",
+                            6=>"Rekomendasi dari Pengawas Sekolah Melapas",
                             7=>"Rekomendasi Melepas dari Kepala Cabang Dinas Kab/Kota",
                             8=>"Rekomendasi Kepala Sekolah Menerima Lengkap dengan Analisis",
-                            9=>"Rekomendasi Menerima dari Pengawas Sekolah",
+                            9=>"Rekomendasi dari Pengawas Sekolah Menerima",
                             10=>"Rekomendasi Menerima dari Kepala Cabang Dinas Kab/Kota",
                             11=>"Analisis Jabatan (Anjab) dari sekolah melepas dan sekolah menerima",
                             12=>"Surat Formasi GTK dari Sekolah Asal",
@@ -105,8 +105,10 @@
                             0=>"Surat Pengantar dari Cabdin Asal",
                             2=>"Permohonan Nota Dinas Bermaterai Ditujukan Kepada Kepala Dinas Pendidikan Aceh",
                             5=>"Rekomendasi Kepsek Melepas + Analisis Kebutuhan Guru",
+                            6=>"Rekomendasi dari Pengawas Sekolah Melapas",
                             7=>"Rekomendasi Cabdin Melepas",
                             8=>"Rekomendasi Kepsek Menerima + Analisis Kebutuhan Guru",
+                            9=>"Rekomendasi dari Pengawas Sekolah Menerima",
                             10=>"Rekomendasi Cabdin Menerima",
                             13=>"Fotokopi SK 80% dan SK Terakhir",
                             17=>"Surat Keterangan Bebas Tugas Belajar dari Kepsek",
@@ -134,7 +136,12 @@
                     ?>
                         <?php if (isset($berkasLabels[$index])): ?>
                             <div class="form-group mb-2">
-                                <label for="googleDriveLink<?= $index ?>">Berkas <?= $index+1 ?> - <?= htmlspecialchars($berkasLabels[$index]) ?></label>
+                                <label for="googleDriveLink<?= $index ?>">
+                                    Berkas <?= $index+1 ?> - <?= htmlspecialchars($berkasLabels[$index]) ?>
+                                        <?php if ($jenisUsulan === 'nota_dinas' && ($index == 6 || $index == 9)): ?>
+                                            <span class="badge bg-danger text-white">New</span>
+                                        <?php endif; ?>
+                                    </label>
                                 <div class="input-group">
                                     <input type="text" 
                                         name="google_drive_link[]" 

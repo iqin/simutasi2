@@ -84,10 +84,10 @@
                         3=>"Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Kepala BKA)",
                         4=>"Surat Permohonan Pindah Tugas Bermaterai (Ditujukan Untuk Gubernur cq Sekda Aceh)",
                         5=>"Rekomendasi Kepala Sekolah Melepas Lengkap dengan Analisis",
-                        6=>"Rekomendasi Melepas dari Pengawas Sekolah",
+                        6=>"Rekomendasi dari Pengawas Sekolah Melapas",
                         7=>"Rekomendasi Melepas dari Kepala Cabang Dinas Kab/Kota",
                         8=>"Rekomendasi Kepala Sekolah Menerima Lengkap dengan Analisis",
-                        9=>"Rekomendasi Menerima dari Pengawas Sekolah",
+                        9=>"Rekomendasi dari Pengawas Sekolah Menerima",
                         10=>"Rekomendasi Menerima dari Kepala Cabang Dinas Kab/Kota",
                         11=>"Analisis Jabatan (Anjab) dari sekolah melepas dan sekolah menerima",
                         12=>"Surat Formasi GTK dari Sekolah Asal",
@@ -107,17 +107,18 @@
                         $berkasLabels[0]  = 'Surat Pengantar dari Cabdin Asal';
                         $berkasLabels[2]  = 'Permohonan Nota Dinas Bermaterai Ditujukan Kepada Kepala Dinas Pendidikan Aceh';
                         $berkasLabels[5]  = 'Rekomendasi Kepsek Melepas + Analisis Kebutuhan Guru';
+                        $berkasLabels[6]  = 'Rekomendasi dari Pengawas Sekolah Melepas';   // tambahan
                         $berkasLabels[7]  = 'Rekomendasi Cabdin Melepas';
                         $berkasLabels[8]  = 'Rekomendasi Kepsek Menerima + Analisis Kebutuhan Guru';
+                        $berkasLabels[9]  = 'Rekomendasi dari Pengawas Sekolah Menerima';   // tambahan
                         $berkasLabels[10] = 'Rekomendasi Cabdin Menerima';
                         $berkasLabels[13] = 'Fotokopi SK 80% dan SK Terakhir';
                         $berkasLabels[17] = 'Surat Keterangan Bebas Tugas Belajar dari Kepsek';
                         $berkasLabels[18] = 'SKP 1 Tahun Terakhir';
                         $berkasLabels[19] = 'Surat Izin Suami/Istri & Buku Nikah';
 
-                        // aktif hanya 10 item sesuai daftar
-                        $activeIndexes = [0,2,5,7,8,10,13,17,18,19];
-                        $optionalIndexes = []; // ✅ tidak ada yang opsional
+                        $activeIndexes = [0,2,5,6,7,8,9,10,13,17,18,19]; // 12 berkas
+                        $optionalIndexes = [];
                     }
 
 
@@ -134,7 +135,12 @@
                     <?php for ($index=0; $index<21; $index++): ?>
                         <?php if (in_array($index, $activeIndexes)): ?>
                             <div class="form-group mb-2">
-                                <label for="googleDriveLink<?= $index ?>">Berkas <?= $index+1 ?> - <?= htmlspecialchars($berkasLabels[$index]) ?></label>
+                                <label for="googleDriveLink<?= $index ?>">
+                                    Berkas <?= $index+1 ?> - <?= htmlspecialchars($berkasLabels[$index]) ?>
+                                    <?php if ($jenis === 'nota_dinas' && ($index == 6 || $index == 9)): ?>
+                                    <span class="badge bg-danger text-white">New</span>
+                                    <?php endif; ?>
+                                </label>
                                 <div class="input-group">
                                     <input type="text" 
                                         name="google_drive_link[]" 
